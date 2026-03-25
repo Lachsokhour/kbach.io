@@ -166,6 +166,7 @@
         <span class="pane-title">Preview</span>
         <span class="pane-badge" id="preview-size-badge">1200 × 630</span>
         <div style="flex:1"></div>
+        <button class="btn" onclick="toggleEffectsPanel()"><i data-lucide="sparkles"></i> Effects</button>
         <button class="btn" onclick="reloadPreview()"><i data-lucide="refresh-cw"></i> Reload</button>
       </div>
 
@@ -178,6 +179,55 @@
           <div class="spinner"></div>
           <span>Generating image…</span>
         </div>
+
+        <!-- Effects Panel -->
+        <div id="effects-panel" class="effects-panel hidden">
+          <div class="ep-header">
+            <span class="ep-title">Effects</span>
+            <div style="display:flex; gap: 4px;">
+              <button class="ep-reset" onclick="resetEffects()" aria-label="Reset Effects" title="Reset to defaults">
+                <i data-lucide="rotate-ccw"></i>
+              </button>
+              <button class="ep-reset" onclick="closeEffectsPanel()" aria-label="Close Panel" title="Close Panel">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="ep-control">
+            <div class="ep-label-row">
+              <span class="ep-label">Blur</span>
+              <span class="ep-value" id="val-blur">0px</span>
+            </div>
+            <input type="range" class="ep-slider" id="rng-blur" min="0" max="20" step="1" value="0" oninput="onEffectChange()">
+          </div>
+
+          <div class="ep-control">
+            <div class="ep-label-row">
+              <span class="ep-label">Noise</span>
+              <span class="ep-value" id="val-noise">0%</span>
+            </div>
+            <input type="range" class="ep-slider" id="rng-noise" min="0" max="100" step="1" value="0" oninput="onEffectChange()">
+          </div>
+
+          <div class="ep-control">
+            <div class="ep-label-row">
+              <span class="ep-label">Saturation</span>
+              <span class="ep-value" id="val-sat">100%</span>
+            </div>
+            <input type="range" class="ep-slider" id="rng-sat" min="0" max="200" step="1" value="100" oninput="onEffectChange()">
+          </div>
+
+          <div class="ep-control">
+            <div class="ep-label-row">
+              <span class="ep-label">Opacity</span>
+              <span class="ep-value" id="val-opac">100%</span>
+            </div>
+            <input type="range" class="ep-slider" id="rng-opac" min="0" max="100" step="1" value="100" oninput="onEffectChange()">
+          </div>
+        </div>
+        <!-- End Effects Panel -->
+
       </div>
 
       <div class="output-bar">

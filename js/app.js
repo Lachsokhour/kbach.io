@@ -278,6 +278,9 @@ function renderPreview() {
   }
   doc.close();
 
+  // Apply Live Effects on render
+  applyLiveEffects();
+
   if (!autoHeight) {
     iframe.onload = null;
     applyScale();
@@ -538,3 +541,93 @@ function getWatermarkHTML() {
     + '</style>'
     + '<div class="kb-watermark">Made with Kbach.io \u2014 \u1780\u17d2\u1794\u17b6\u1785\u17cb</div>';
 }
+
+// ─── Live Effects Panel ────────────────────────────────────────
+
+var effectBlur = 0;
+var effectNoise = 0;
+var effectSat = 100;
+var effectOpac = 100;
+
+function toggleEffectsPanel() {
+  document.getElementById('effects-panel').classList.toggle('hidden');
+}
+
+function resetEffects() {
+  document.getElementById('rng-blur').value = 0;
+  document.getElementById('rng-noise').value = 0;
+  document.getElementById('rng-sat').value = 100;
+  document.getElementById('rng-opac').value = 100;
+  onEffectChange();
+}
+
+function onEffectChange() {
+  effectBlur = document.getElementById('rng-blur').value;
+  effectNoise = document.getElementById('rng-noise').value;
+  effectSat = document.getElementById('rng-sat').value;
+  effectOpac = document.getElementById('rng-opac').value;
+
+  document.getElementById('val-blur').textContent = effectBlur + 'px';
+  document.getElementById('val-noise').textContent = effectNoise + '%';
+  document.getElementById('val-sat').textContent = effectSat + '%';
+  document.getElementById('val-opac').textContent = effectOpac + '%';
+
+  applyLiveEffects();
+}
+
+function applyLiveEffects() {
+  var iframe = document.getElementById('preview-iframe');
+  if (!iframe) return;
+  var doc = iframe.contentDocument || iframe.contentWindow.document;
+  if (!doc || !doc.body) return;
+
+  var styleEl = doc.getElementById('kbach-dynamic-effects');
+  if (!styleEl) {
+    styleEl = doc.createElement('style');
+    styleEl.id = 'kbach-dynamic-effects';
+    if(doc.head) doc.head.appendChild(styleEl);
+  }
+
+  var blurFilter = effectBlur > 0 ? 'blur(' + effectBlur + 'px) ' : '';
+  var satFilter = effectSat != 100 ? 'saturate(' + effectSat + '%) ' : '';
+  var filterValue = (blurFilter + satFilter).trim() || 'none';
+  var opacValue = effectOpac / 100;
+
+  styleEl.textContent = `
+    /* Effects Panel Styling */
+    html {
+      filter: ${filterValue};
+      opacity: ${opacValue};
+      transition: filter 0.1s ease, opacity 0.1s ease;
+    }
+  `;
+
+  var noiseEl = doc.getElementById('kbach-noise-overlay');
+  if (effectNoise > 0) {
+    if (!noiseEl) {
+      noiseEl = doc.createElement('div');
+      noiseEl.id = 'kbach-noise-overlay';
+      noiseEl.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:2147483647;';
+      noiseEl.innerHTML = `
+        <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; opacity:1;">
+          <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+        </svg>`;
+      doc.documentElement.appendChild(noiseEl);
+    }
+    noiseEl.style.opacity = effectNoise / 100;
+  } else if (noiseEl) {
+    noiseEl.remove();
+  }
+}
+
+// Ensure effects functions are globally available since this is a module
+window.toggleEffectsPanel = toggleEffectsPanel;
+window.closeEffectsPanel = function() {
+  document.getElementById('effects-panel').classList.add('hidden');
+};
+window.resetEffects = resetEffects;
+window.onEffectChange = onEffectChange;
+
