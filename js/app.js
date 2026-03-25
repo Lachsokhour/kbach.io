@@ -363,7 +363,7 @@ function exportPNG() {
     resolved = true;
     setTimeout(function () {
       try {
-        html2canvas(offscreen.contentDocument.body, {
+        html2canvas(offscreen.contentDocument.documentElement, {
           width: currentW,
           height: currentH,
           scale: exportScale,
@@ -377,46 +377,98 @@ function exportPNG() {
           scrollY: 0
         }).then(function (canvas) {
           document.body.removeChild(offscreen);
-          var url = canvas.toDataURL('image/png');
-          var actualW = canvas.width;
-          var actualH = canvas.height;
+          
+          function finalizeExport(exportCanvas) {
+            var url = exportCanvas.toDataURL('image/png');
+            var actualW = exportCanvas.width;
+            var actualH = exportCanvas.height;
 
-          var thumb = document.getElementById('output-thumb');
-          if (thumb) {
-            thumb.src = url;
-            thumb.style.display = 'block';
+            var thumb = document.getElementById('output-thumb');
+            if (thumb) {
+              thumb.src = url;
+              thumb.style.display = 'block';
+            }
+
+            var outInfo = document.getElementById('output-info');
+            if (outInfo) {
+              outInfo.innerHTML =
+                '<div class="output-info-row">Dimensions: <span>' + actualW + ' \u00d7 ' + actualH + 'px</span></div>' +
+                '<div class="output-info-row">Scale: <span>' + exportScale + '\u00d7</span></div>' +
+                '<div class="output-info-row">Format: <span>PNG</span></div>';
+            }
+
+            var outBody = document.getElementById('output-body');
+            if (outBody) outBody.classList.add('open');
+            var outIcon = document.getElementById('out-icon');
+            if (outIcon) outIcon.classList.add('open');
+            var outBadge = document.getElementById('out-badge');
+            if (outBadge) outBadge.style.display = 'inline';
+
+            var now = new Date();
+            var ts = now.getFullYear() +
+              ('0' + (now.getMonth() + 1)).slice(-2) +
+              ('0' + now.getDate()).slice(-2) + '-' +
+              ('0' + now.getHours()).slice(-2) +
+              ('0' + now.getMinutes()).slice(-2) +
+              ('0' + now.getSeconds()).slice(-2);
+
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'kbach-io-' + ts + '.png';
+            a.click();
+
+            showMsg('Exported \u2713');
+            showLoading(false);
           }
 
-          var outInfo = document.getElementById('output-info');
-          if (outInfo) {
-            outInfo.innerHTML =
-              '<div class="output-info-row">Dimensions: <span>' + actualW + ' \u00d7 ' + actualH + 'px</span></div>' +
-              '<div class="output-info-row">Scale: <span>' + exportScale + '\u00d7</span></div>' +
-              '<div class="output-info-row">Format: <span>PNG</span></div>';
+          if (effectBlur == 0 && effectSat == 100 && effectOpac == 100 && effectNoise == 0) {
+            finalizeExport(canvas);
+            return;
           }
 
-          var body = document.getElementById('output-body');
-          if (body) body.classList.add('open');
-          var outIcon = document.getElementById('out-icon');
-          if (outIcon) outIcon.classList.add('open');
-          var outBadge = document.getElementById('out-badge');
-          if (outBadge) outBadge.style.display = 'inline';
+          var finalCanvas = document.createElement('canvas');
+          finalCanvas.width = canvas.width;
+          finalCanvas.height = canvas.height;
+          var ctx = finalCanvas.getContext('2d');
 
-          var now = new Date();
-          var ts = now.getFullYear() +
-            ('0' + (now.getMonth() + 1)).slice(-2) +
-            ('0' + now.getDate()).slice(-2) + '-' +
-            ('0' + now.getHours()).slice(-2) +
-            ('0' + now.getMinutes()).slice(-2) +
-            ('0' + now.getSeconds()).slice(-2);
+          var blurFilter = effectBlur > 0 ? 'blur(' + (effectBlur * exportScale) + 'px) ' : '';
+          var satFilter = effectSat != 100 ? 'saturate(' + effectSat + '%) ' : '';
+          ctx.filter = (blurFilter + satFilter).trim() || 'none';
+          ctx.globalAlpha = effectOpac / 100;
+          
+          // Draw the html2canvas snapshot with blur/saturation/opacity filters applied 
+          ctx.drawImage(canvas, 0, 0);
 
-          var a = document.createElement('a');
-          a.href = url;
-          a.download = 'kbach-io-' + ts + '.png';
-          a.click();
+          // Reset filter before drawing noise
+          ctx.filter = 'none';
+          ctx.globalAlpha = 1.0;
 
-          showMsg('Exported \u2713');
-          showLoading(false);
+          if (effectNoise > 0) {
+            var noiseSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + finalCanvas.width + '" height="' + finalCanvas.height + '">' +
+              '<filter id="noiseFilter">' +
+                '<feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>' +
+              '</filter>' +
+              '<rect width="100%" height="100%" filter="url(#noiseFilter)" opacity="' + (effectNoise / 100) + '" />' +
+            '</svg>';
+            
+            var svgBlob = new Blob([noiseSvg], {type: 'image/svg+xml;charset=utf-8'});
+            var URLObj = window.URL || window.webkitURL || window;
+            var svgUrl = URLObj.createObjectURL(svgBlob);
+            var img = new Image();
+            img.onload = function() {
+              ctx.drawImage(img, 0, 0);
+              URLObj.revokeObjectURL(svgUrl);
+              finalizeExport(finalCanvas);
+            };
+            img.onerror = function() {
+              URLObj.revokeObjectURL(svgUrl);
+              finalizeExport(finalCanvas); 
+            };
+            img.src = svgUrl;
+          } else {
+            finalizeExport(finalCanvas);
+          }
+
         }).catch(function (err) {
           console.error(err);
           showMsg('Export failed', true);
@@ -441,6 +493,7 @@ function exportPNG() {
   
   doc.write(injected);
   doc.close();
+  
   setTimeout(doCapture, 1200);
 }
 
@@ -575,8 +628,8 @@ function onEffectChange() {
   applyLiveEffects();
 }
 
-function applyLiveEffects() {
-  var iframe = document.getElementById('preview-iframe');
+function applyLiveEffects(targetIframe) {
+  var iframe = targetIframe || document.getElementById('preview-iframe');
   if (!iframe) return;
   var doc = iframe.contentDocument || iframe.contentWindow.document;
   if (!doc || !doc.body) return;
