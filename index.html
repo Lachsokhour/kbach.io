@@ -941,7 +941,7 @@ body {
     <div class="headline">Something <em>big</em><br>is coming.</div>
     <div class="body">We're launching our new platform on Monday. Thousands of teams are already on the waitlist.</div>
   </div>
- div class="right">
+  <div class="right">
     <div class="right-emoji">🚀</div>
     <div class="right-date">March 2026</div>
   </div>
@@ -957,7 +957,7 @@ body {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { width: 900px; height: 380px; overflow: hidden; font-family: 'Courier New', monospace; background: #f9f6f0; display: flex; align-items: stretch; position: relative; }
-  body::aer { content: ''; position: absolute; left: 640px; top: 0; bottom: 0; width: 1px; background: repeating-linear-gradient(to bottom, #d0c9bc, #d0c9bc 8px, transparent 8px, transparent 16px); }
+  body::after { content: ''; position: absolute; left: 640px; top: 0; bottom: 0; width: 1px; background: repeating-linear-gradient(to bottom, #d0c9bc, #d0c9bc 8px, transparent 8px, transparent 16px); }
   .main-side { width: 640px; padding: 44px 50px; display: flex; flex-direction: column; justify-content: space-between; background: #fff; border: 2px solid #0e0e0e; border-right: none; }
   .event-type { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #c8441a; }
   .event-name { font-size: 38px; font-weight: 700; color: #0e0e0e; margin-top: 8px; line-height: 1.1; font-family: Georgia, serif; }
@@ -984,7 +984,7 @@ body {
       <div><div class="detail-label">Date</div><div class="detail-val">Sat, Apr 5, 2026</div></div>
       <div><div class="detail-label">Doors open</div><div class="detail-val">7:30 PM</div></div>
       <div><div class="detail-label">Venue</div><div class="detail-val">Meridian Hall</div></div>
-    iv>
+    </div>
   </div>
   <div class="stub">
     <div class="stub-emoji">🎟</div>
@@ -999,7 +999,7 @@ body {
 </html>
 </script>
 
-<script type="text/template" id="tpl-reipt" data-w="420" data-h="680">
+<script type="text/template" id="tpl-receipt" data-w="420" data-h="680">
 <!DOCTYPE html>
 <html>
 <head>
@@ -1025,7 +1025,7 @@ body {
   <div class="dashed"></div>
   <div class="row"><span class="label">Date:</span><span>Mar 25, 2026 09:14</span></div>
   <div class="row"><span class="label">Order #:</span><span>BCR-4821</span></div>
-  <div classow"><span class="label">Server:</span><span>Jamie T.</span></div>
+  <div class="row"><span class="label">Server:</span><span>Jamie T.</span></div>
   <div class="dashed"></div>
   <div class="row"><span class="item-name">Flat White</span><span class="item-qty">x1</span><span class="item-price">$6.00</span></div>
   <div class="row"><span class="item-name">Oat Milk</span><span class="item-qty">x1</span><span class="item-price">$0.80</span></div>
@@ -1074,7 +1074,7 @@ body {
     <div class="em">🍕</div><div class="em">⚡</div><div class="em">🎸</div>
   </div>
   <div class="row">
-    <div class="em">🧑‍ðv class="em">👨‍🎨</div><div class="em">🏳️‍🌈</div>
+    <div class="em">🧑‍🚀</div><div class="em">👨‍🎨</div><div class="em">🏳️‍🌈</div>
     <div class="em">🤝🏽</div><div class="em">💅🏾</div><div class="em">🧑‍🚀</div>
   </div>
   <div class="note">ZWJ sequences · skin tones · flags · complex emoji</div>
@@ -1085,7 +1085,7 @@ body {
 <script>
 // ─── Templates — read from <script type="text/template"> tags ────────────────
 var TEMPLATES = {};
-['og','quote','profile','announce','ticket','receipt','emoji'].forEach(function(e) {
+['og','quote','profile','announce','ticket','receipt','emoji'].forEach(function(name) {
   var el = document.getElementById('tpl-' + name);
   if (!el) return;
   TEMPLATES[name] = {
@@ -1110,7 +1110,7 @@ window.addEventListener('DOMContentLoaded', function() {
     document.getElementById('theme-btn').textContent = '\u2600\uFE0F';
   }
   loadTemplate('og');
-  document.getElementById('inp-w'ener('change', onDimChange);
+  document.getElementById('inp-w').addEventListener('change', onDimChange);
   document.getElementById('inp-h').addEventListener('change', onDimChange);
 });
 
@@ -1139,7 +1139,8 @@ function loadTemplate(name) {
 function onEditorChange() {
   updateLineNums();
   updateStats();
-  clearTimeout(updateTidateTimer = setTimeout(renderPreview, 300);
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(renderPreview, 300);
 }
 
 function handleTab(e) {
@@ -1273,7 +1274,7 @@ function copyHTML() {
   showMsg('Copied!');
 }
 
-// ─── Preview ─────────────────────────────────â──────
+// ─── Preview ─────────────────────────────────────────────────
 function renderPreview() {
   var html = document.getElementById('html-editor').value.trim();
   if (!html) return;
@@ -1289,7 +1290,7 @@ function renderPreview() {
     var probe = '<script>'
       + '(function poll(attempts){'
       + 'var h=Math.max('
-      + 'document.body.scrollHeight:0,'
+      + 'document.body?document.body.scrollHeight:0,'
       + 'document.documentElement?document.documentElement.scrollHeight:0'
       + ');'
       + 'if(h>0){parent.postMessage({type:"autoH",h:h},"*");}'
@@ -1344,7 +1345,7 @@ function applyScale() {
 function toggleTheme() {
   var isLight = document.documentElement.classList.toggle('light');
   document.getElementById('theme-btn').textContent = isLight ? '\uD83C\uDF19' : '\u2600\uFE0F';
-  localStorage.setItLight ? 'light' : 'dark');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
 }
 
 // ─── Export ───────────────────────────────────────────────────
@@ -1435,7 +1436,7 @@ function exportPNG() {
 // ─── UI helpers ───────────────────────────────────────────────
 function showLoading(on) {
   var el = document.getElementById('preview-loading');
-  if (on) el.classList.ashow');
+  if (on) el.classList.add('show');
   else el.classList.remove('show');
 }
 
@@ -1465,7 +1466,7 @@ function showAlert(opts) {
   var okLabel = opts.okLabel || 'OK';
   var okClass = opts.okClass || 'primary';
   var cancelLabel = opts.cancelLabel !== undefined ? opts.cancelLabel : 'Cancel';
-  var onConfirm = om || null;
+  var onConfirm = opts.onConfirm || null;
 
   document.getElementById('alert-icon').textContent = icon;
   document.getElementById('alert-icon').className = 'alert-icon ' + iconClass;
