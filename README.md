@@ -16,6 +16,7 @@ Kbach.io is a powerful, web-based tool designed for creators and developers who 
 - **💎 Retina-Ready Export**: Export at 1x, 2x (Retina), 3x, or 4x (Ultra HD) for crystal-clear results.
 - **🛠️ Built-in Templates**: Start fast with professionally designed templates for Quotes, Profile Cards, Tickets, and Receipts.
 - **🌗 Dark Mode Driven**: A premium, developer-focused interface with full dark/light mode support.
+- **↩️ Contextual Undo**: Instantly recover accidentally cleared code with a smart, morphing Undo button.
 - **📋 Clipboard Integration**: Quickly copy your HTML code or export directly to PNG.
 
 ## 🚀 How to Use
@@ -27,9 +28,12 @@ Kbach.io is a powerful, web-based tool designed for creators and developers who 
 
 ## 🛠️ Technology Stack
 
-- **Core**: Vanilla HTML5, CSS3, and JavaScript.
+- **Core**: Vanilla HTML5, CSS3, and JavaScript (ES Module architecture).
+- **Editor**: [CodeJar](https://medialize.github.io/CodeJar/) for a lightweight, performant code editing experience.
+- **Syntax Highlighting**: [Prism.js](https://prismjs.com/) for real-time markup highlighting.
+- **Icons**: [Lucide Icons](https://lucide.dev/) for a consistent and professional icon set.
 - **Engine**: [html2canvas](https://html2canvas.hertzen.com/) for high-fidelity DOM-to-Canvas rendering.
-- **Typography**: Optimized with *JetBrains Mono*, *Nunito*, and *Kantumruy Pro*.
+- **Typography**: Inter, _JetBrains Mono_, _Nunito_, and _Kantumruy Pro_.
 
 ## 🎨 Local Development
 
