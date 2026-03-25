@@ -263,10 +263,18 @@ function renderPreview() {
       + 'if(attempts>0)setTimeout(function(){poll(attempts-1);},150);'
       + '})(6);'
       + closeTag;
-    var injected = html.indexOf('</body>') !== -1 ? html.replace('</body>', probe + '</body>') : html + probe;
+    
+    var watermark = getWatermarkHTML();
+    var injected = html.indexOf('</body>') !== -1 
+      ? html.replace('</body>', watermark + probe + '</body>') 
+      : html + watermark + probe;
     doc.write(injected);
   } else {
-    doc.write(html);
+    var watermark = getWatermarkHTML();
+    var injected = html.indexOf('</body>') !== -1 
+      ? html.replace('</body>', watermark + '</body>') 
+      : html + watermark;
+    doc.write(injected);
   }
   doc.close();
 
@@ -391,9 +399,17 @@ function exportPNG() {
           var outBadge = document.getElementById('out-badge');
           if (outBadge) outBadge.style.display = 'inline';
 
+          var now = new Date();
+          var ts = now.getFullYear() +
+            ('0' + (now.getMonth() + 1)).slice(-2) +
+            ('0' + now.getDate()).slice(-2) + '-' +
+            ('0' + now.getHours()).slice(-2) +
+            ('0' + now.getMinutes()).slice(-2) +
+            ('0' + now.getSeconds()).slice(-2);
+
           var a = document.createElement('a');
           a.href = url;
-          a.download = 'html2img-export.png';
+          a.download = 'kbach-io-' + ts + '.png';
           a.click();
 
           showMsg('Exported \u2713');
@@ -414,7 +430,13 @@ function exportPNG() {
   offscreen.onload = doCapture;
   var doc = offscreen.contentDocument || offscreen.contentWindow.document;
   doc.open();
-  doc.write(html);
+  
+  var watermark = getWatermarkHTML();
+  var injected = html.indexOf('</body>') !== -1 
+    ? html.replace('</body>', watermark + '</body>') 
+    : html + watermark;
+  
+  doc.write(injected);
   doc.close();
   setTimeout(doCapture, 1200);
 }
@@ -486,3 +508,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }).observe(viewport);
   }
 });
+
+function getWatermarkHTML() {
+  const show = document.getElementById('show-watermark')?.checked;
+  if (!show) return '';
+  
+  return '<style>'
+    + '@import url("https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap");'
+    + 'body { position: relative; min-height: 100vh; margin: 0; }'
+    + '.kb-watermark {'
+    + '  position: absolute;'
+    + '  bottom: 0;'
+    + '  right: 0;'
+    + '  padding: 8px 14px;'
+    + '  font-family: "Kantumruy Pro", -apple-system, sans-serif;'
+    + '  font-size: 12px;'
+    + '  font-weight: 600;'
+    + '  color: rgba(0,0,0,0.45);'
+    + '  background: rgba(255,255,255,0.6);'
+    + '  backdrop-filter: blur(8px);'
+    + '  -webkit-backdrop-filter: blur(8px);'
+    + '  border-top-left-radius: 10px;'
+    + '  z-index: 999999;'
+    + '  pointer-events: none;'
+    + '  letter-spacing: 0.01em;'
+    + '  line-height: 1;'
+    + '  box-shadow: 0 0 0 1px rgba(0,0,0,0.05);'
+    + '}'
+    + '</style>'
+    + '<div class="kb-watermark">Made with Kbach.io \u2014 \u1780\u17d2\u1794\u17b6\u1785\u17cb</div>';
+}

@@ -10,6 +10,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
   <link rel="stylesheet" href="css/styles.css">
@@ -92,7 +95,11 @@
         <option value="3">3× — high res</option>
         <option value="4">4× — ultra HD</option>
       </select>
-      <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0"></span>
+      <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0;margin-right:8px"></span>
+      <label class="auto-h-toggle" title="Show branding watermark on image">
+        <input type="checkbox" id="show-watermark" onchange="renderPreview()">
+        <span class="auto-h-label">Watermark</span>
+      </label>
     </div>
 
     <div class="spacer"></div>
