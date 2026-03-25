@@ -301,7 +301,7 @@ window.addEventListener('message', function (e) {
 function reloadPreview() { renderPreview(); }
 
 function applyScale() {
-  var scale = parseFloat(document.getElementById('scale-sel').value);
+  var scale = parseFloat(document.getElementById('preview-scale').value);
   var wrap = document.getElementById('preview-wrap');
   var viewport = document.getElementById('preview-viewport');
   if (!viewport) return;

@@ -28,6 +28,10 @@
         alt="logo">
       <span style="font-family:'Nunito',sans-serif;font-weight:800;letter-spacing:-0.03em">Kbach.io</span><span
         style="font-family:'Kantumruy Pro',sans-serif;font-weight:600;font-size:13px;opacity:0.55;margin-left:6px;letter-spacing:0.01em">ក្បាច់</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle dark/light mode">
+        <i data-lucide="moon"></i>
+      </button>
     </div>
 
     <div class="topbar-section" style="gap:6px">
@@ -62,6 +66,9 @@
           <option value="420,680">Receipt — 420×680</option>
         </optgroup>
       </select>
+    </div>
+
+    <div class="topbar-section" style="gap:6px; flex-direction:row; align-items:center;">
       <span class="topbar-label" style="margin-left:4px">W</span>
       <input class="dim-input" id="inp-w" type="number" value="1200" min="100" max="4000" oninput="onDimInput()">
       <span class="dim-x">×</span>
@@ -76,7 +83,7 @@
 
     <div class="topbar-section">
       <span class="topbar-label">Scale</span>
-      <select class="scale-select" id="scale-sel" onchange="applyScale()">
+      <select class="topbar-select" id="preview-scale" onchange="updatePreviewSize()">
         <option value="0.2">20%</option>
         <option value="0.25">25%</option>
         <option value="0.33">33%</option>
@@ -95,7 +102,10 @@
         <option value="3">3× — high res</option>
         <option value="4">4× — ultra HD</option>
       </select>
-      <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0;margin-right:8px"></span>
+      <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0"></span>
+    </div>
+
+    <div class="topbar-section">
       <label class="auto-h-toggle" title="Show branding watermark on image">
         <input type="checkbox" id="show-watermark" onchange="renderPreview()">
         <span class="auto-h-label">Watermark</span>
@@ -104,23 +114,12 @@
 
     <div class="spacer"></div>
 
-    <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle dark/light mode">
-      <i data-lucide="moon"></i>
-    </button>
-    <button class="btn btn-copy" onclick="copyHTML()" aria-label="Copy HTML to clipboard">
+    <!-- Removed btn-theme from here -->
+    <button class="btn btn-copy-html" onclick="copyHTML()" aria-label="Copy HTML to clipboard">
       <i data-lucide="copy"></i> Copy HTML
     </button>
     <button class="btn btn-export" onclick="exportPNG()" aria-label="Export PNG image">
-      <i data-lucide="download"></i>
-      Export PNG
-    </button>
-  </div>
-
-  <!-- Mobile Floating Export -->
-  <div class="mobile-fab-wrap" style="display:none">
-    <button class="mobile-fab" onclick="exportPNG()">
-      <i data-lucide="download"></i>
-      Export Image
+      <i data-lucide="download"></i> Export PNG
     </button>
   </div>
 
@@ -173,7 +172,7 @@
       <div class="preview-viewport" id="preview-viewport">
         <div class="preview-wrap" id="preview-wrap">
           <div class="preview-frame-label" id="frame-label">1200 × 630px</div>
-          <iframe id="preview-iframe" width="1200" height="630" sandbox="allow-scripts allow-same-origin"></iframe>
+          <iframe id="preview-iframe" width="1200" height="630"></iframe>
         </div>
         <div class="preview-loading" id="preview-loading">
           <div class="spinner"></div>
