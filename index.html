@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kbach.io — ក្បាច់</title>
+<link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&family=Kantumruy+Pro:wght@400;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Dark mode (default) */
+  --bg: #0d0d0d;
+  --bg2: #141414;
+  --bg3: #1c1c1c;
+  --bg4: #242424;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e6e0;
+  --muted: #666;
+  --muted2: #888;
+  --accent: #7fff6e;
+  --accent2: #3dff8f;
+  --danger: #ff5a5a;
+  --editor-text: #abb2bf;
+  --shadow: rgba(0,0,0,0.6);
+  --grid-line: rgba(255,255,255,0.015);
+  --loading-bg: rgba(13,13,13,0.7);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Nunito', sans-serif;
+}
+
+html.light {
+  --bg: #f5f5f4;
+  --bg2: #ffffff;
+  --bg3: #f0efee;
+  --bg4: #e8e7e5;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a1917;
+  --muted: #9a9690;
+  --muted2: #6b6760;
+  --accent: #16a34a;
+  --accent2: #15803d;
+  --danger: #dc2626;
+  --editor-text: #383a42;
+  --shadow: rgba(0,0,0,0.12);
+  --grid-line: rgba(0,0,0,0.04);
+  --loading-bg: rgba(245,245,244,0.75);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 48px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg2);
+}
+
+.logo {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  padding: 0 16px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.logo-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.topbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 100%;
+  border-right: 1px solid var(--border);
+}
+
+.topbar-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--sans);
+  font-weight: 700;
+}
+
+.dim-input {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--text);
+  width: 70px;
+  text-align: center;
+}
+.dim-input:focus { outline: none; border-color: var(--accent); }
+.dim-input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.auto-h-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+.auto-h-toggle input[type="checkbox"] { display: none; }
+.auto-h-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  background: var(--bg3);
+  transition: all 0.15s;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.auto-h-toggle input:checked + .auto-h-label {
+  background: rgba(127,255,110,0.1);
+  border-color: rgba(127,255,110,0.35);
+  color: var(--accent);
+}
+
+.dim-x { color: var(--muted); font-size: 11px; }
+
+.scale-select {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.scale-select:focus { outline: none; }
+
+.spacer { flex: 1; }
+
+.btn {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted2);
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.btn:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+
+.btn-export {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.btn-export:hover { background: var(--accent2); border-color: var(--accent2); color: #000; }
+.btn-export svg { width: 13px; height: 13px; }
+
+.btn-copy { margin-left: 4px; }
+
+/* Theme toggle */
+.btn-theme {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 15px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+/* ── Main layout ── */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Editor pane ── */
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  min-height: 0;
+}
+
+.pane-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 36px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.pane-title {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pane-badge {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--bg4);
+  color: var(--muted2);
+  border: 1px solid var(--border);
+  letter-spacing: 0.05em;
+}
+.pane-badge.live { background: rgba(127,255,110,0.1); color: var(--accent); border-color: rgba(127,255,110,0.25); }
+
+.editor-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#html-editor {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--editor-text);
+  border: none;
+  resize: none;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  padding: 20px;
+  outline: none;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+  caret-color: var(--accent);
+}
+
+/* Line numbers overlay */
+.editor-lines {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 44px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 20px 8px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-align: right;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+}
+
+#html-editor { padding-left: 58px; }
+
+.editor-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.status-pill {
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: var(--bg4);
+  font-size: 9px;
+  border: 1px solid var(--border);
+}
+
+/* Template chips */
+.tpl-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.tpl-row::-webkit-scrollbar { display: none; }
+
+.tpl-chip {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--muted2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  letter-spacing: 0.01em;
+}
+.tpl-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(127,255,110,0.07); }
+
+/* ── Preview pane ── */
+.preview-pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  min-height: 0;
+}
+
+.preview-viewport {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 32px;
+  background: var(--bg);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  position: relative;
+}
+
+.preview-frame-label {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+#preview-iframe {
+  display: block;
+  border: none;
+  box-shadow: 0 0 0 1px var(--border2), 0 20px 60px var(--shadow);
+}
+
+/* Loading overlay */
+.preview-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--loading-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  font-size: 11px;
+  color: var(--muted2);
+  gap: 8px;
+}
+.preview-loading.show { opacity: 1; pointer-events: all; }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Output panel ── */
+.output-bar {
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.output-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.output-header:hover { background: var(--bg3); }
+.output-toggle-icon { font-size: 9px; color: var(--muted); transition: transform 0.2s; }
+.output-toggle-icon.open { transform: rotate(90deg); }
+
+.output-body {
+  display: none;
+  padding: 0 16px 14px;
+  gap: 10px;
+}
+.output-body.open {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+#output-thumb {
+  width: 160px;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+  display: none;
+}
+
+.output-info { display: flex; flex-direction: column; gap: 5px; }
+.output-info-row { font-size: 10px; color: var(--muted2); display: flex; gap: 6px; }
+.output-info-row span { color: var(--text); }
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── Pretty Alert Dialog ── */
+.alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.alert-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.alert-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  padding: 0;
+  width: 400px;
+  max-width: calc(100vw - 40px);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05);
+  transform: translateY(14px) scale(0.96);
+  transition: transform 0.25s cubic-bezier(.34,1.4,.64,1);
+  overflow: hidden;
+}
+.alert-overlay.show .alert-box {
+  transform: translateY(0) scale(1);
+}
+
+/* Top coloured stripe based on type */
+.alert-stripe {
+  height: 4px;
+  width: 100%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.alert-stripe.danger  { background: linear-gradient(90deg, #ff5a5a, #ff8c42); }
+.alert-stripe.warn    { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.alert-stripe.success { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.alert-stripe.info    { background: linear-gradient(90deg, #60a5fa, #818cf8); }
+
+.alert-body {
+  padding: 26px 26px 22px;
+}
+
+.alert-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.alert-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.alert-icon.warn    { background: rgba(245,158,11,0.12);  border: 1px solid rgba(245,158,11,0.25); }
+.alert-icon.danger  { background: rgba(255,90,90,0.12);   border: 1px solid rgba(255,90,90,0.25); }
+.alert-icon.success { background: rgba(127,255,110,0.1);  border: 1px solid rgba(127,255,110,0.25); }
+.alert-icon.info    { background: rgba(96,165,250,0.1);   border: 1px solid rgba(96,165,250,0.25); }
+
+.alert-text { flex: 1; min-width: 0; }
+.alert-title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.alert-msg {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.65;
+}
+
+.alert-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 14px 26px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.alert-btn {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  background: var(--bg3);
+  color: var(--muted2);
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+}
+.alert-btn:hover { background: var(--bg4); color: var(--text); }
+
+.alert-btn.primary {
+  background: var(--accent);
+  color: #000;
+  border-color: transparent;
+}
+.alert-btn.primary:hover { background: var(--accent2); filter: brightness(1.05); }
+
+.alert-btn.danger-btn {
+  background: rgba(255,90,90,0.13);
+  color: var(--danger);
+  border-color: rgba(255,90,90,0.28);
+}
+.alert-btn.danger-btn:hover { background: rgba(255,90,90,0.22); }
+
+/* ── Footer ── */
+.app-footer {
+  flex-shrink: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+.app-footer .sep { opacity: 0.4; }
+.app-footer .author {
+  color: var(--muted2);
+  font-weight: 700;
+}
+
+/* ── Auto-height preview ── */
+.preview-wrap {
+  position: relative;
+  transition: transform 0.2s;
+  transform-origin: top center;
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="logo">
+    <img class="logo-img" src="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo" alt="logo">
+    <span style="font-family:'Nunito',sans-serif;font-weight:800;letter-spacing:-0.03em">Kbach.io</span><span style="font-family:'Kantumruy Pro',sans-serif;font-weight:600;font-size:13px;opacity:0.55;margin-left:6px;letter-spacing:0.01em">ក្បាច់</span>
+  </div>
+
+  <div class="topbar-section" style="gap:6px">
+    <select class="scale-select" id="preset-sel" onchange="loadPreset()" style="font-size:11px;padding:4px 8px;max-width:160px">
+      <option value="">Custom</option>
+      <optgroup label="Social">
+        <option value="1200,630">OG / Twitter — 1200×630</option>
+        <option value="1080,1080">Instagram Square — 1080×1080</option>
+        <option value="1080,1920">Instagram Story — 1080×1920</option>
+        <option value="1080,566">Instagram Landscape — 1080×566</option>
+        <option value="1200,628">Facebook Post — 1200×628</option>
+        <option value="820,312">Facebook Cover — 820×312</option>
+        <option value="1500,500">Twitter Header — 1500×500</option>
+        <option value="800,800">LinkedIn Post — 800×800</option>
+        <option value="1128,191">LinkedIn Banner — 1128×191</option>
+      </optgroup>
+      <optgroup label="Presentation">
+        <option value="1920,1080">Full HD 16:9 — 1920×1080</option>
+        <option value="2560,1440">2K — 2560×1440</option>
+        <option value="1280,720">HD 720p — 1280×720</option>
+        <option value="1024,768">XGA 4:3 — 1024×768</option>
+      </optgroup>
+      <optgroup label="Print (px @96dpi)">
+        <option value="794,1123">A4 Portrait — 794×1123</option>
+        <option value="1123,794">A4 Landscape — 1123×794</option>
+        <option value="816,1056">US Letter — 816×1056</option>
+      </optgroup>
+      <optgroup label="Cards">
+        <option value="600,360">Profile Card — 600×360</option>
+        <option value="900,380">Event Ticket — 900×380</option>
+        <option value="420,680">Receipt — 420×680</option>
+      </optgroup>
+    </select>
+    <span class="topbar-label" style="margin-left:4px">W</span>
+    <input class="dim-input" id="inp-w" type="number" value="1200" min="100" max="4000" oninput="onDimInput()">
+    <span class="dim-x">×</span>
+    <span class="topbar-label">H</span>
+    <input class="dim-input" id="inp-h" type="number" value="630" min="100" max="4000" oninput="onDimInput()" placeholder="auto">
+    <label class="auto-h-toggle" title="Auto-detect height from content">
+      <input type="checkbox" id="auto-h" onchange="onAutoHChange()">
+      <span class="auto-h-label">auto H</span>
+    </label>
+  </div>
+
+  <div class="topbar-section">
+    <span class="topbar-label">Scale</span>
+    <select class="scale-select" id="scale-sel" onchange="applyScale()">
+      <option value="0.2">20%</option>
+      <option value="0.25">25%</option>
+      <option value="0.33">33%</option>
+      <option value="0.5" selected>50%</option>
+      <option value="0.67">67%</option>
+      <option value="0.75">75%</option>
+      <option value="1">100%</option>
+    </select>
+  </div>
+
+  <div class="topbar-section">
+    <span class="topbar-label">Export @</span>
+    <select class="scale-select" id="export-scale" onchange="updateExportLabel()">
+      <option value="1">1× — standard</option>
+      <option value="2" selected>2× — retina</option>
+      <option value="3">3× — high res</option>
+      <option value="4">4× — ultra HD</option>
+    </select>
+    <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0"></span>
+  </div>
+
+  <div class="spacer"></div>
+
+  <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+  <button class="btn btn-copy" onclick="copyHTML()">Copy HTML</button>
+  <button class="btn btn-export" onclick="exportPNG()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/>
+    </svg>
+    Export PNG
+  </button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Editor -->
+  <div class="editor-pane">
+    <div class="pane-header">
+      <span class="pane-title">HTML Editor</span>
+      <span class="pane-badge live" id="live-badge">● live</span>
+      <div style="flex:1"></div>
+      <button class="btn" style="padding:3px 10px;font-size:10px" onclick="formatHTML()">Format</button>
+      <button class="btn" style="padding:3px 10px;font-size:10px" onclick="clearEditor()">Clear</button>
+    </div>
+
+    <div class="tpl-row" id="tpl-row">
+      <span class="tpl-chip" onclick="loadTemplate('og')">OG Card 1200×630</span>
+      <span class="tpl-chip" onclick="loadTemplate('quote')">Quote Card</span>
+      <span class="tpl-chip" onclick="loadTemplate('profile')">Profile Card</span>
+      <span class="tpl-chip" onclick="loadTemplate('announce')">Announcement</span>
+      <span class="tpl-chip" onclick="loadTemplate('ticket')">Event Ticket</span>
+      <span class="tpl-chip" onclick="loadTemplate('receipt')">Receipt</span>
+      <span class="tpl-chip" onclick="loadTemplate('emoji')">Emoji Test</span>
+    </div>
+
+    <div class="editor-area">
+      <div class="editor-lines" id="line-nums"></div>
+      <textarea id="html-editor" spellcheck="false" autocomplete="off" autocorrect="off" oninput="onEditorChange()" onkeydown="handleTab(event)" onscroll="syncScroll()"></textarea>
+    </div>
+
+    <div class="editor-status">
+      <span id="status-chars">0 chars</span>
+      <span id="status-lines">0 lines</span>
+      <span class="status-pill" id="status-dim">1200 × 630</span>
+      <div style="flex:1"></div>
+      <span id="status-msg" style="color:var(--accent)"></span>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-pane">
+    <div class="pane-header">
+      <span class="pane-title">Preview</span>
+      <span class="pane-badge" id="preview-size-badge">1200 × 630</span>
+      <div style="flex:1"></div>
+      <button class="btn" style="padding:3px 10px;font-size:10px" onclick="reloadPreview()">↺ Reload</button>
+    </div>
+
+    <div class="preview-viewport" id="preview-viewport">
+      <div class="preview-wrap" id="preview-wrap">
+        <div class="preview-frame-label" id="frame-label">1200 × 630px</div>
+        <iframe id="preview-iframe" width="1200" height="630" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div class="preview-loading" id="preview-loading">
+        <div class="spinner"></div>
+        <span>Generating image…</span>
+      </div>
+    </div>
+
+    <div class="output-bar">
+      <div class="output-header" onclick="toggleOutput()">
+        <span class="output-toggle-icon" id="out-icon">▶</span>
+        <span class="pane-title">Output</span>
+        <span class="pane-badge" id="out-badge" style="display:none">PNG ready</span>
+      </div>
+      <div class="output-body" id="output-body">
+        <img id="output-thumb" alt="output">
+        <div class="output-info" id="output-info"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="app-footer">
+  <span>© 2026</span>
+  <span class="sep">·</span>
+  <span style="font-family:'Nunito',sans-serif;font-weight:800">Kbach.io</span><span style="font-family:'Kantumruy Pro',sans-serif;font-size:10px;opacity:0.6;margin-left:4px">ក្បាច់</span>
+  <span class="sep">·</span>
+  <span>Powered by <span class="author">Sokhour LACH</span></span>
+</div>
+<div class="alert-overlay" id="alert-overlay">
+  <div class="alert-box" id="alert-box">
+    <div class="alert-stripe" id="alert-stripe"></div>
+    <div class="alert-body">
+      <div class="alert-header">
+        <div class="alert-icon" id="alert-icon">⚠️</div>
+        <div class="alert-text">
+          <div class="alert-title" id="alert-title">Confirm</div>
+          <div class="alert-msg" id="alert-msg">Are you sure?</div>
+        </div>
+      </div>
+    </div>
+    <div class="alert-footer">
+      <button class="alert-btn" id="alert-cancel" onclick="alertCancel()">Cancel</button>
+      <button class="alert-btn" id="alert-ok" onclick="alertConfirm()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Templates ───────────────────────────────────────────────
+const TEMPLATES = {
+  og: {
+    w: 1200, h: 630,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 80px;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 50%, rgba(120,80,255,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, rgba(255,80,130,0.25) 0%, transparent 50%);
+  }
+  .emoji { font-size: 88px; z-index: 1; line-height: 1; }
+  .title {
+    font-size: 68px; font-weight: 800; color: #fff;
+    text-align: center; z-index: 1; line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .subtitle {
+    font-size: 26px; color: rgba(255,255,255,0.55);
+    text-align: center; z-index: 1;
+  }
+  .badge {
+    font-family: monospace; font-size: 15px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.75);
+    padding: 8px 22px; border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.15);
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+  <div class="emoji">🚀</div>
+  <div class="title">Ship it faster</div>
+  <div class="subtitle">Build products people actually love</div>
+  <div class="badge">html2img · v2.0</div>
+</body>
+</html>`
+  },
+
+  quote: {
+    w: 800, h: 800,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 800px; height: 800px; overflow: hidden;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #fdf6e3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 90px;
+    position: relative;
+  }
+  .quote-mark {
+    position: absolute;
+    top: 20px; left: 40px;
+    font-size: 220px; color: rgba(0,0,0,0.06);
+    line-height: 1; font-family: serif;
+    user-select: none;
+  }
+  .emoji { font-size: 52px; margin-bottom: 32px; }
+  .quote {
+    font-size: 34px; line-height: 1.55;
+    color: #2c2c2c; text-align: center;
+    position: relative; z-index: 1;
+  }
+  .divider {
+    width: 48px; height: 2px;
+    background: #c8a96a;
+    margin: 36px auto;
+  }
+  .author {
+    font-size: 18px; color: #999;
+    font-style: italic; text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="quote-mark">"</div>
+  <div class="emoji">💡</div>
+  <div class="quote">The best way to predict<br>the future is to invent it.</div>
+  <div class="divider"></div>
+  <div class="author">— Alan Kay</div>
+</body>
+</html>`
+  },
+
+  profile: {
+    w: 600, h: 360,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 600px; height: 360px; overflow: hidden;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding: 50px;
+    border: 2px solid #0e0e0e;
+    position: relative;
+  }
+  .avatar {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: #f4f0e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    flex-shrink: 0;
+    border: 3px solid #0e0e0e;
+  }
+  .name { font-size: 30px; font-weight: 800; color: #0e0e0e; }
+  .role { font-size: 15px; color: #777; margin-top: 6px; }
+  .stats { display: flex; gap: 28px; margin-top: 24px; }
+  .stat-val { font-size: 26px; font-weight: 800; color: #0e0e0e; }
+  .stat-lbl { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+  .corner {
+    position: absolute; top: 18px; right: 18px;
+    background: #0e0e0e; color: #fff;
+    font-size: 10px; padding: 4px 12px;
+    border-radius: 3px; letter-spacing: 0.06em;
+  }
+  .accent-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff4500, #ff8c00, #ffd700);
+  }
+</style>
+</head>
+<body>
+  <div class="avatar">🧑‍💻</div>
+  <div>
+    <div class="name">Alex Chen</div>
+    <div class="role">Full-stack Engineer · Open Source</div>
+    <div class="stats">
+      <div>
+        <div class="stat-val">142</div>
+        <div class="stat-lbl">Projects</div>
+      </div>
+      <div>
+        <div class="stat-val">8.4k</div>
+        <div class="stat-lbl">Stars</div>
+      </div>
+      <div>
+        <div class="stat-val">3.1k</div>
+        <div class="stat-lbl">Followers</div>
+      </div>
+    </div>
+  </div>
+  <div class="corner">Available ✓</div>
+  <div class="accent-bar"></div>
+</body>
+</html>`
+  },
+
+  announce: {
+    w: 1000, h: 500,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1000px; height: 500px; overflow: hidden;
+    font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+    background: #0a0a0a;
+    display: flex;
+  }
+  .stripe {
+    width: 8px;
+    background: repeating-linear-gradient(
+      -45deg, #ffe600, #ffe600 10px, #0a0a0a 10px, #0a0a0a 20px
+    );
+  }
+  .content {
+    flex: 1;
+    padding: 60px 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .eyebrow {
+    font-size: 13px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #ffe600;
+    margin-bottom: 18px; font-weight: 700;
+  }
+  .headline {
+    font-size: 56px; font-weight: 900;
+    color: #fff; line-height: 1.05;
+    margin-bottom: 22px;
+    letter-spacing: -0.02em;
+  }
+  .headline em { color: #ffe600; font-style: normal; }
+  .body { font-size: 17px; color: rgba(255,255,255,0.45); line-height: 1.6; font-family: Arial, sans-serif; font-weight: 400; }
+  .right {
+    width: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    background: rgba(255,230,0,0.04);
+    border-left: 1px solid rgba(255,255,255,0.05);
+  }
+  .right-emoji { font-size: 86px; }
+  .right-date { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.12em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="stripe"></div>
+  <div class="content">
+    <div class="eyebrow">🎙 Announcing</div>
+    <div class="headline">Something <em>big</em><br>is coming.</div>
+    <div class="body">We're launching our new platform on Monday. Thousands of teams are already on the waitlist.</div>
+  </div>
+  <div class="right">
+    <div class="right-emoji">🚀</div>
+    <div class="right-date">March 2026</div>
+  </div>
+</body>
+</html>`
+  },
+
+  ticket: {
+    w: 900, h: 380,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 900px; height: 380px; overflow: hidden;
+    font-family: 'Courier New', monospace;
+    background: #f9f6f0;
+    display: flex;
+    align-items: stretch;
+    position: relative;
+  }
+  body::after {
+    content: '';
+    position: absolute;
+    left: 640px; top: 0; bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(
+      to bottom, #d0c9bc, #d0c9bc 8px, transparent 8px, transparent 16px
+    );
+  }
+  .main-side {
+    width:px;
+    padding: 44px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #fff;
+    border: 2px solid #0e0e0e;
+    border-right: none;
+  }
+  .event-type {
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #c8441a;
+  }
+  .event-name {
+    font-size: 38px; font-weight: 700;
+    color: #0e0e0e; margin-top: 8px;
+    line-height: 1.1; font-family: Georgia, serif;
+  }
+  .event-sub {
+    font-size: 15px; color: #888; margin-top: 8px;
+  }
+  .details { display: flex; gap: 36px; }
+  .detail-label { font-size: 9px; color: #aaa; letter-spacing: 0.12em; text-transform: uppercase; }
+  .detail-val { font-size: 16px; color: #0e0e0e; margin-top: 4px; font-weight: 600; }
+  .stub {
+    flex: 1;
+    padding: 44px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff8f4;
+    border: 2px solid #0e0e0e;
+    border-left: none;
+  }
+  .stub-emoji { font-size: 52px; }
+  .stub-num { font-size: 28px; font-weight: 700; color: #0e0e0e; letter-spacing: 0.04em; }
+  .stub-seat { font-size: 10px; color: #aaa; letter-spacing: 0.12em; text-transform: uppercase; }
+  .barcode {
+    display: flex; gap: 2px; align-items: flex-end; height: 40px;
+  }
+  .barcode div {
+    background: #0e0e0e;
+    width: 2px;
+  }
+</style>
+</head>
+<body>
+  <div class="main-side">
+    <div>
+      <div class="event-type">🎵 Live Concert · General Admission</div>
+      <div class="event-name">The Night We<br>ember</div>
+      <div class="event-sub">feat. The Electric Owls</div>
+    </div>
+    <div class="details">
+      <div>
+        <div class="detail-label">Date</div>
+        <div class="detail-val">Sat, Apr 5, 2026</div>
+      </div>
+      <div>
+        <div class="detail-label">Doors open</div>
+        <div class="detail-val">7:30 PM</div>
+      </div>
+      <div>
+        <div class="detail-label">Venue</div>
+        <div class="detail-val">Meridian Hall</div>
+      </div>
+    </div>
+  </div>
+  <div class="stub">
+    <div class="stub-emoji">🎟</div>
+    <div>
+      <div class="stub-num">A · 14</div>
+      <div class="stub-seat">Row · Seat</div>
+    </div>
+    <div class="barcode" id="bc"></div>
+  </div>
+  <script>
+    const bc = document.getElementById('bc');
+    const heights = [30,20,35,25,40,18,32,28,38,22,35,20,30,25,40,18,34,26,38,20,30];
+    heights.forEach(h => {
+      const d = document.createElement('div');
+      d.style.height = h + 'px';
+      bc.appendChild(d);
+    });
+  <\/script>
+</body>
+</h`
+  },
+
+  receipt: {
+    w: 420, h: 680,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 420px; height: 680px; overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+    background: #fff;
+    padding: 40px 36px;
+    font-size: 13px;
+    color: #222;
+  }
+  .store { text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .store-sub { text-align: center; font-size: 11px; color: #999; margin-top: 4px; }
+  .dashed { border-top: 1px dashed #ccc; margin: 18px 0; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0; }
+  .item-name { flex: 1; }
+  .item-qty { color: #999; margin-right: 12px; }
+  .item-price { font-weight: 600; }
+  .label { color: #999; }
+  .total-row { font-size: 16px; font-weight: 700; }
+  .receipt-num { text-align: center; font-size: 10px; color: #bbb; letter-spacing: 0.1em; }
+  .thank { text-align: center; font-size: 13px; margin-top: 4px; }
+  .barcode-row { display: flex; justify-content: center; gap: 2px; align-items: flex-end; height: 36px; margin: 12px 0; }
+  .barcode-row div { background: #222; width: 2px; }
+</style>
+</head>
+<body>
+  <div class="store">☕ Beancraft</div>
+  <div class="store-sub">Specialty Coffee · Est. 2019</div>
+
+  <div class="dashed"></div>
+  <div class="row"><span class="label">Date:</span><span>Mar 25, 2026 09:14</span></div>
+  <div class="row"><span class="label">Ord#:</span><span>BCR-4821</span></div>
+  <div class="row"><span class="label">Server:</span><span>Jamie T.</span></div>
+  <div class="dashed"></div>
+
+  <div class="row"><span class="item-name">Flat White</span><span class="item-qty">×1</span><span class="item-price">$6.00</span></div>
+  <div class="row"><span class="item-name">Oat Milk</span><span class="item-qty">×1</span><span class="item-price">$0.80</span></div>
+  <div class="row"><span class="item-name">Avocado Toast</span><span class="item-qty">×1</s><span class="item-price">$12.50</span></div>
+  <div class="row"><span class="item-name">Matcha Latte</span><span class="item-qty">×2</span><span class="item-price">$13.00</span></div>
+  <div class="row"><span class="item-name">Blueberry Muffin</span><span class="item-qty">×1</span><span class="item-price">$4.50</span></div>
+
+  <div class="dashed"></div>
+  <div class="row"><span class="label">Subtotal</span><span>$36.80</span></div>
+  <div class="row"><span class="label">Tax (7%)</span><span>$2.58</span><iv>
+  <div class="row"><span class="label">Tip</span><span>$5.00</span></div>
+  <div class="dashed"></div>
+  <div class="row total-row"><span>TOTAL</span><span>$44.38</span></div>
+  <div class="row"><span class="label">Paid (Visa ****4231)</span><span>$44.38</span></div>
+  <div class="dashed"></div>
+
+  <div class="barcode-row" id="bc2"></div>
+  <div class="receipt-num">BCR-4821-20260325</div>
+  <div class="dashed"></div>
+  <div class="thank">Thanks for visiting! ☕🫶</div>
+
+  <script>
+    const bc = docu.getElementById('bc2');
+    [28,18,34,22,38,16,30,24,36,20,32,18,28,26,36,18,32,24,36,18,28].forEach(h => {
+      const d = document.createElement('div'); d.style.height = h + 'px'; bc.appendChild(d);
+    });
+  <\/script>
+</body>
+</html>`
+  },
+
+  emoji: {
+    w: 800, h: 400,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 800px; height: 400px; overflow: hidden;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px;
+  }
+  h2 {
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .em {
+    font-size: 44px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    width: 72px; height: 72px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: transform 0.1s;
+  }
+  .note {
+    font-family: monospace; font-size: 11px;
+    color: rgba(255,255,255,0.25);
+  }
+</style>
+</head>
+<body>
+  <h2>Emoji Rendering Test</h2>
+  <div class="row">
+    <div class="em">😀</div>
+    <div class="em">🎉</div>
+    <div class="em">🚀</div>
+    <div class="em">❤️</div>
+    <div >🌍</div>
+    <div class="em">🦊</div>
+    <div class="em">🍕</div>
+    <div class="em">⚡</div>
+    <div class="em">🎸</div>
+  </div>
+  <div class="row">
+    <div class="em">🧑‍💻</div>
+    <div class="em">👨‍🎨</div>
+    <div class="em">🏳️‍🌈</div>
+    <div class="em">🤝🏽</div>
+    <div class="em">💅🏾</div>
+    <div class="em">🧑‍🚀</div>
+  </div>
+  <div class="note">ZWJ sequences · skin tones · flags · complex emoji</div>
+</body>
+</html>`
+  }
+};
+
+// ─── State ───────────────────────────────────────────────────
+let updateTimer = null;
+let currentW = 1200, currentH = 630;
+let autoHeight = false;
+
+// ─── Init ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Restore theme
+  const saved = torage.getItem('theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    document.getElementById('theme-btn').textContent = '🌙';
+  } else {
+    document.getElementById('theme-btn').textContent = '☀️';
+  }
+  loadTemplate('og');
+  document.getElementById('inp-w').addEventListener('change', onDimChange);
+  document.getElementById('inp-h').addEventListener('change', onDimChange);
+});
+
+function loadTemplate(name) {
+  const t = TEMPLATES[name];
+  if (!t) return;
+  documeElementById('html-editor').value = t.html;
+  document.getElementById('inp-w').value = t.w;
+  currentW = t.w; currentH = t.h;
+  setAutoH(false);
+  document.getElementById('inp-h').value = t.h;
+  // Try to match a preset
+  const presetSel = document.getElementById('preset-sel');
+  const matchVal = t.w + ',' + t.h;
+  presetSel.value = [...presetSel.options].some(o => o.value === matchVal) ? matchVal : '';
+  updateDimLabels();
+  updateLineNums();
+  updateStats();
+  renderPreview();
+}
+
+// ─── Editor ────────────────────────────────────────
+function onEditorChange() {
+  updateLineNums();
+  updateStats();
+  clearTimeout(updateTimer);
+  updateTimer = setTimeout(renderPreview, 300);
+}
+
+function handleTab(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const t = e.target, s = t.selectionStart, end = t.selectionEnd;
+    t.value = t.value.substring(0, s) + '  ' + t.value.substring(end);
+    t.selectionStart = t.selectionEnd = nEditorChange();
+  }
+}
+
+function syncScroll() {
+  const ed = document.getElementById('html-editor');
+  document.getElementById('line-nums').scrollTop = ed.scrollTop;
+}
+
+function updateLineNums() {
+  const val = document.getElementById('html-editor').value;
+  const lines = val.split('\n').length;
+  let html = '';
+  for (let i = 1; i <= lines; i++) html += i + '\n';
+  document.getElementById('line-nums').textContent = html;
+}
+
+function updateStats() {
+  const val = document.getElementById('html-editor').value;
+  document.getElementById('status-chars').textContent = val.length.toLocaleString() + ' chars';
+  document.getElementById('status-lines').textContent = val.split('\n').length + ' lines';
+}
+
+function onDimInput() {
+  // Mark preset as custom when user manually edits
+  document.getElementById('preset-sel').value = '';
+}
+
+function onDimChange() {
+  currentW = parseInt(document.getElementById('inp-w').value) || 1200;
+  if (!autoHeight) {
+    currentH = parseInt(document.getElementById('inp-h').value) || 630;
+  }
+  updateDimLabels();
+  renderPreview();
+}
+
+function loadPreset() {
+  const val = document.getElementById('preset-sel').value;
+  if (!val) return;
+  const [w, h] = val.split(',').map(Number);
+  currentW = w; currentH = h;
+  document.getElementById('inp-w').value = w;
+  document.getElementById('inp-h').value = h;
+  // Turn off auto-H when picking a preset
+  setAutoH(false);
+  updateDimLabels();
+  renderPreview();
+}
+
+function onAutoHChange() {
+  setAutoH(document.getElementById('auto-h').checked);
+  renderPreview();
+}
+
+function setAutoH(on) {
+  autoHeight = on;
+  document.getElementById('auto-h').checked = on;
+  const hInput = document.getElementById('inp-h');
+  hInput.disabled = on;
+  if (on) {
+    hInput.placeholder = 'auto';
+    hInput.value = '';
+  } else {
+    hInput.placeholder = '';
+    hInput.value = currentH;
+  }
+}
+
+function updateDimLabels() {
+  const label = currentW + ' × ' + currentH;
+  document.getElementById('status-dim').textContent = label;
+  document.getElementById('preview-size-badge').tetContent = label;
+  document.getElementById('frame-label').textContent = currentW + ' × ' + currentH + 'px';
+  document.getElementById('preview-iframe').width = currentW;
+  document.getElementById('preview-iframe').height = currentH;
+  updateExportLabel();
+}
+
+function updateExportLabel() {
+  const scale = parseInt(document.getElementById('export-scale').value) || 2;
+  const outW = currentW * scale;
+  const outH = currentH * scale;
+  document.getElementById('export-px-label').textContent = outW + ' × ' + oH + 'px';
+}
+
+function formatHTML() {
+  // Simple indent formatter
+  const ed = document.getElementById('html-editor');
+  let html = ed.value;
+  let indent = 0;
+  const lines = html.split(/>\s*</);
+  const result = lines.map((line, i) => {
+    if (i > 0) line = '<' + line;
+    if (i < lines.length - 1) line = line + '>';
+    if (line.match(/^<\/\w/)) indent = Math.max(0, indent - 1);
+    const out = '  '.repeat(indent) + line.trim();
+    if (line.match(/^<\w[^/]*[^/]>$/) && !line.match(/^<(br|hr|img|input|meta|link)/i)) indent++;
+    return out;
+  });
+  ed.value = result.join('\n');
+  updateLineNums();
+  updateStats();
+}
+
+function clearEditor() {
+  showAlert({
+    icon: '🗑️',
+    iconClass: 'warn',
+    title: 'Clear Editor',
+    msg: 'This will remove all your HTML. This action cannot be undone.',
+    okLabel: 'Clear',
+    okClass: 'danger-btn',
+    onConfirm: () => {
+      document.getElementById('html-editor').value = '';
+      onEditorChange();
+    }
+  });
+}
+
+function copyHTML() {
+  navigator.clipboardteText(document.getElementById('html-editor').value);
+  showMsg('Copied!');
+}
+
+// ─── Preview ──────────────────────────────────────────────────
+function renderPreview() {
+  const html = document.getElementById('html-editor').value.trim();
+  if (!html) return;
+  const iframe = document.getElementById('preview-iframe');
+  iframe.width = currentW;
+  iframe.height = autoHeight ? 1 : currentH; // start tiny so content isn't padded
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+
+  if (autoHeight) {
+    // Inject postMessage reporter so iframe tells us its real content height
+    const probe = `
+<script>
+(function poll(attempts){
+  var h = Math.max(
+    document.body ? document.body.scrollHeight : 0,
+    document.documentElement ? document.documentElement.scrollHeight : 0
+  );
+  if(h > 0){ parent.postMessage({type:'autoH',h:h},'*'); }
+  if(attempts > 0) setTimeout(function(){ poll(attempts-1); }, 150);
+})(6);
+<\/script>`;
+    // Inject probe just before </body> or at end
+    const injected = html.includes('</body>') ? html.replace('</body>', probe + '</body>') : html + probe;
+    doc.write(injected);
+  } else {
+    doc.write(html);
+  }
+  doc.close();
+
+  if (!autoHeight) {
+    iframe.onload = null;
+    applyScale();
+  }
+}
+
+// Listen for height reports from iframe
+window.addEventListener('message', (e) => {
+  if (!autoHeight || !e.data || e.data.type !== 'autoH') return;
+  const h = Math.round(e.data.h);
+  if (h > 0 && h < 30000) {
+    currentH = h;
+    const iframe = document.getElementById('preview-iframe');
+    iframe.height = h;
+    document.getElementById('inp-h').placeholder = h + 'px';
+    updateDimLabels();
+    applyScale();
+  }
+});
+
+function reloadPreview() { renderPreview(); }
+
+function applyScale() {
+  const scale = parseFloat(document.getElementById('scale-sel').value);
+  const wrap = document.getElementById('preview-wrap');
+  const viewport = document.getElementById('preview-viewport');
+  const vpW = viewport.clientWidth - 80;
+  const autoScale = Math.min(scale, vpW / currentW);
+  wrap.style.transform = `scale(${autoScale})`;
+  const scaledH = currentH * autoScale;
+  const scaledW = currentW * autoScale;
+  wrap.style.marginBottom = `${-(currentH - scaledH)}px`;
+  wrap.style.marginRight = `${-(currentW - scaledW) / 2}px`;
+  wrap.style.marginLeft = `${-(currentW - scaledW) / 2}px`;
+  wrap.style.marginTop = '0';
+}
+
+// ─── Theme ────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  document.getElementById('theme-btn').textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// ─── Export ────────────────────────────────────â────────────
+async function exportPNG() {
+  const html = document.getElementById('html-editor').value.trim();
+  if (!html) {
+    showAlert({ icon: '📄', iconClass: 'warn', title: 'Nothing to Export', msg: 'The editor is empty. Add some HTML first, then try exporting.', okLabel: 'Got it', okClass: 'primary', cancelLabel: null, onConfirm: () => {} });
+    return;
+  }
+
+  const exportScale = parseInt(document.getElementById('export-scale').value) || 2;
+
+  showLoading(true);
+  showMs…');
+
+  try {
+    // Create offscreen iframe at full resolution
+    const offscreen = document.createElement('iframe');
+    offscreen.style.cssText = `position:fixed;left:-99999px;top:0;border:none;opacity:0;pointer-events:none;`;
+    offscreen.width = currentW;
+    offscreen.height = currentH;
+    document.body.appendChild(offscreen);
+
+    await new Promise(resolve => {
+      offscreen.onload = resolve;
+      const doc = offscreen.contentDocument || offscreen.contentWindow.document;
+      doc.open();
+    doc.write(html);
+      doc.close();
+      // fallback
+      setTimeout(resolve, 800);
+    });
+
+    // Wait a tick for scripts/fonts inside iframe
+    await new Promise(r => setTimeout(r, 500));
+
+    const canvas = await html2canvas(offscreen.contentDocument.body, {
+      width: currentW,
+      height: currentH,
+      scale: exportScale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false,
+      windowWidth: currentW,
+      windowHeight: currentH,
+      scrollX: 0,
+      scrollY: 0,
+    });
+
+    document.body.removeChild(offscreen);
+
+    const url = canvas.toDataURL('image/png');
+    const actualW = canvas.width;
+    const actualH = canvas.height;
+
+    // Show thumbnail
+    const thumb = document.getElementById('output-thumb');
+    thumb.src = url;
+    thumb.style.display = 'block';
+
+    // Info
+    document.getElementById('output-info').innerHTML = `
+      <div class="output-info-row">Dimensions: <span>${actualW} × ${actualH}px</span></div>
+      <div class="outputinfo-row">Scale: <span>${exportScale}×</span></div>
+      <div class="output-info-row">Format: <span>PNG</span></div>
+    `;
+
+    // Show output panel
+    const body = document.getElementById('output-body');
+    body.classList.add('open');
+    document.getElementById('out-icon').classList.add('open');
+    document.getElementById('out-badge').style.display = 'inline';
+
+    // Download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'html2img-export.png';
+    a.click();
+
+    shoMsg('Exported ✓');
+  } catch (err) {
+    console.error(err);
+    showMsg('Export failed', true);
+    showAlert({ icon: '❌', iconClass: 'danger', title: 'Export Failed', msg: err.message || 'An unexpected error occurred during export.', okLabel: 'OK', okClass: 'primary', cancelLabel: null, onConfirm: () => {} });
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ─── UI helpers ─────────────────────────────────────────â showLoading(on) {
+  document.getElementById('preview-loading').classList.toggle('show', on);
+}
+
+function showMsg(msg, err = false) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.style.color = err ? 'var(--danger)' : 'var(--accent)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; }, 3000);
+}
+
+function toggleOutput() {
+  const body = document.getElementById('output-body');
+  const icon = document.getElementById('out-icon');
+  body.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+// ─── Pretty Alert System ──────────────────────────────────────
+let _alertCallback = null;
+
+function showAlert({ icon = '⚠️', iconClass = 'warn', title, msg, okLabel = 'OK', okClass = 'primary', cancelLabel = 'Cancel', onConfirm }) {
+  document.getElementById('alert-icon').textContent = icon;
+  document.getElementById('alert-icon').className = 'alert-icon ' + iconClass;
+  do.getElementById('alert-stripe').className = 'alert-stripe ' + iconClass;
+  document.getElementById('alert-title').textContent = title;
+  document.getElementById('alert-msg').textContent = msg;
+  document.getElementById('alert-ok').textContent = okLabel;
+  document.getElementById('alert-ok').className = 'alert-btn ' + okClass;
+  const cancelBtn = document.getElementById('alert-cancel');
+  cancelBtn.textContent = cancelLabel || 'Cancel';
+  cancelBtn.style.display = cancelLabel === null ? 'none' : '';
+  _alertCallback = onConfirm;
+  document.getElementById('alert-overlay').classList.add('show');
+}
+
+function alertConfirm() {
+  document.getElementById('alert-overlay').classList.remove('show');
+  document.getElementById('alert-cancel').style.display = '';
+  if (_alertCallback) { _alertCallback(); _alertCallback = null; }
+}
+
+function alertCancel() {
+  document.getElementById('alert-overlay').classList.remove('show');
+  document.getElementById('alert-cancel').style.display = '';
+  _alertCallback = null;
+}
+
+// Close on overlay click
+document.getElementById('alert-overlay').addEventListener('click', function(e) {
+  if (e.target === this) alertCancel();
+});
+
+// Keyboard close
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') alertCancel();
+  if (e.key === 'Enter' && document.getElementById('alert-overlay').classList.contains('show')) {
+    e.preventDefault();
+    alertConfirm();
+  }
+});
+
+// ─── Resize observer for auto-scale ──────────────────────────
+let _resizeTimer = null;
+new ResizeObserver(() => {
+  if (_resizeTimer) return;
+  _resizeTimer = requestAnimationFrame(() => { _resizeTimer = null; applyScale(); });
+}).observe(document.getElementById('preview-viewport'));
+</script>
+</body>
+</html>
