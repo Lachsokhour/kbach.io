@@ -132,8 +132,8 @@
         <span class="pane-title">HTML Editor</span>
         <span class="pane-badge live" id="live-badge"><i data-lucide="circle" class="live-dot"></i> live</span>
         <div style="flex:1"></div>
-        <button class="btn" onclick="formatHTML()"><i data-lucide="sparkles"></i> Format</button>
-        <button class="btn" id="btn-clear" onclick="clearEditor()"><i data-lucide="trash-2"></i> Clear</button>
+        <button class="btn" onclick="formatHTML()"><i data-lucide="sparkles"></i> <span class="btn-text">Format</span></button>
+        <button class="btn btn-clear-action" id="btn-clear" onclick="clearEditor()"><i data-lucide="trash-2"></i> <span class="btn-text">Clear</span></button>
       </div>
 
       <div class="tpl-row" id="tpl-row">
@@ -256,6 +256,19 @@
       style="font-family:'Kantumruy Pro',sans-serif;font-size:10px;opacity:0.6;margin-left:4px">ក្បាច់</span>
     <span class="sep">·</span>
     <span><span class="footer-highlight">Powered by</span> <span class="author">Sokhour LACH</span></span>
+  </div>
+
+  <!-- Mobile Action Bar -->
+  <div class="mobile-action-bar hidden-desktop">
+    <button class="btn" onclick="formatHTML()" aria-label="Format HTML">
+      <i data-lucide="sparkles"></i>
+    </button>
+    <button class="btn btn-clear-action" onclick="clearEditor()" aria-label="Clear Editor">
+      <i data-lucide="trash-2"></i> <span class="btn-text">Clear</span>
+    </button>
+    <button class="btn btn-export" onclick="exportPNG()" aria-label="Export PNG image">
+      <i data-lucide="download"></i> Export PNG
+    </button>
   </div>
   <script src="js/templates.js"></script>
   <script type="module" src="js/app.js"></script>

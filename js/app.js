@@ -189,9 +189,10 @@ function formatHTML() {
   updateStats();
 }
 
-function clearEditor() {
-  const btn = document.getElementById('btn-clear');
-  if (btn && btn.classList.contains('undo-mode')) {
+function clearEditor(e) {
+  const btns = document.querySelectorAll('.btn-clear-action');
+  
+  if (btns.length > 0 && btns[0].classList.contains('undo-mode')) {
     undoClear();
     return;
   }
@@ -202,28 +203,31 @@ function clearEditor() {
   updateLineNums();
   updateStats();
   
-  if (btn) {
+  btns.forEach(btn => {
     btn.classList.add('undo-mode');
     btn.innerHTML = '<i data-lucide="rotate-ccw"></i> Undo';
     if (window.lucide) lucide.createIcons();
     clearTimeout(btn._undoTimer);
     btn._undoTimer = setTimeout(() => {
       btn.classList.remove('undo-mode');
-      btn.innerHTML = '<i data-lucide="trash-2"></i> Clear';
+      // If it's a mobile icon-only button, maybe just revert to trash icon if we had specific logic,
+      // but let's just make sure they both share the text on standard reset, 
+      // or we can remove the label contextually via CSS.
+      btn.innerHTML = '<i data-lucide="trash-2"></i> <span class="btn-text">Clear</span>';
       if (window.lucide) lucide.createIcons();
     }, 6000);
-  }
+  });
 }
 
 function undoClear(e) {
   if (e) e.preventDefault();
-  const btn = document.getElementById('btn-clear');
-  if (btn) {
+  const btns = document.querySelectorAll('.btn-clear-action');
+  btns.forEach(btn => {
     clearTimeout(btn._undoTimer);
     btn.classList.remove('undo-mode');
-    btn.innerHTML = '<i data-lucide="trash-2"></i> Clear';
+    btn.innerHTML = '<i data-lucide="trash-2"></i> <span class="btn-text">Clear</span>';
     if (window.lucide) lucide.createIcons();
-  }
+  });
 
   if (!lastCode) return;
   if (jar) jar.updateCode(lastCode);
@@ -351,32 +355,60 @@ function exportPNG() {
   showLoading(true);
   showMsg('Rendering\u2026');
 
-  var offscreen = document.createElement('iframe');
-  offscreen.style.cssText = 'position:fixed;left:-99999px;top:0;border:none;opacity:0;pointer-events:none;';
-  offscreen.width = currentW;
-  offscreen.height = currentH;
-  document.body.appendChild(offscreen);
+  // Pre-load web fonts from the generated HTML into the main document to ensure html2canvas can access them
+  var parser = new DOMParser();
+  var parsedHtml = parser.parseFromString(html, 'text/html');
+  var links = parsedHtml.querySelectorAll('link[rel="stylesheet"]');
+  var fontLoads = [];
+  
+  links.forEach(function(link) {
+    var href = link.getAttribute('href');
+    if (href && !document.querySelector('link[href="' + href + '"]')) {
+      var newLink = document.createElement('link');
+      newLink.rel = 'stylesheet';
+      newLink.href = href;
+      document.head.appendChild(newLink);
+      
+      fontLoads.push(new Promise(function(resolve) {
+        newLink.onload = resolve;
+        newLink.onerror = resolve;
+      }));
+    }
+  });
 
-  var resolved = false;
-  function doCapture() {
-    if (resolved) return;
-    resolved = true;
-    setTimeout(function () {
-      try {
-        html2canvas(offscreen.contentDocument.documentElement, {
-          width: currentW,
-          height: currentH,
-          scale: exportScale,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: null,
-          logging: false,
-          windowWidth: currentW,
-          windowHeight: currentH,
-          scrollX: 0,
-          scrollY: 0
-        }).then(function (canvas) {
-          document.body.removeChild(offscreen);
+  // Give the browser a tiny delay if no new links are added to ensure fonts cache is ready
+  var readyPromise = fontLoads.length > 0 
+    ? Promise.all(fontLoads).then(function() { return new Promise(function(r) { setTimeout(r, 100); }); })
+    : Promise.resolve();
+
+  readyPromise.then(function() {
+    var offscreen = document.createElement('iframe');
+    offscreen.style.cssText = 'position:fixed;left:-99999px;top:0;border:none;opacity:0;pointer-events:none;';
+    offscreen.width = currentW;
+    offscreen.height = currentH;
+    document.body.appendChild(offscreen);
+  
+    var resolved = false;
+    function doCapture() {
+      if (resolved) return;
+      resolved = true;
+      
+      setTimeout(function () {
+        try {
+          html2canvas(offscreen.contentDocument.documentElement, {
+            width: currentW,
+            height: currentH,
+            scale: exportScale,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: false,
+            windowWidth: currentW,
+            windowHeight: currentH,
+            scrollX: 0,
+            scrollY: 0
+          }).then(function (canvas) {
+            document.body.removeChild(offscreen);
           
           function finalizeExport(exportCanvas) {
             var url = exportCanvas.toDataURL('image/png');
@@ -495,6 +527,7 @@ function exportPNG() {
   doc.close();
   
   setTimeout(doCapture, 1200);
+  });
 }
 
 async function copyImage() {
