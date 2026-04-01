@@ -80,6 +80,8 @@ export function clearEditor() {
   updateLineNums();
   updateStats();
   
+  import('./ui.js').then(ui => ui.closeOutput());
+  
   btns.forEach(btn => {
     btn.classList.add('undo-mode');
     btn.innerHTML = '<i data-lucide="rotate-ccw"></i> Undo';

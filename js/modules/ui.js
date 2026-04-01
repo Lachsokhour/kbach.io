@@ -107,6 +107,13 @@ export function toggleOutput() {
   if (icon) icon.classList.toggle('open');
 }
 
+export function closeOutput() {
+  var body = document.getElementById('output-body');
+  var icon = document.getElementById('out-icon');
+  if (body) body.classList.remove('open');
+  if (icon) icon.classList.remove('open');
+}
+
 // ─── Live Effects Panel ────────────────────────────────────────
 export function toggleEffectsPanel() {
   document.getElementById('effects-panel').classList.toggle('hidden');
