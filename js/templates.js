@@ -1,4 +1,4 @@
-const TEMPLATES = {
+export const TEMPLATES = {
   og: {
     w: 1200,
     h: 630,
