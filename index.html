@@ -132,6 +132,7 @@
         <span class="pane-title">HTML Editor</span>
         <span class="pane-badge live" id="live-badge"><i data-lucide="circle" class="live-dot"></i> live</span>
         <div style="flex:1"></div>
+        <button class="btn" onclick="pasteHTML()"><i data-lucide="clipboard"></i> <span class="btn-text">Paste</span></button>
         <button class="btn" onclick="formatHTML()"><i data-lucide="sparkles"></i> <span class="btn-text">Format</span></button>
         <button class="btn btn-clear-action" id="btn-clear" onclick="clearEditor()"><i data-lucide="trash-2"></i> <span class="btn-text">Clear</span></button>
       </div>
@@ -260,6 +261,9 @@
 
   <!-- Mobile Action Bar -->
   <div class="mobile-action-bar hidden-desktop">
+    <button class="btn" onclick="pasteHTML()" aria-label="Paste HTML">
+      <i data-lucide="clipboard"></i>
+    </button>
     <button class="btn" onclick="formatHTML()" aria-label="Format HTML">
       <i data-lucide="sparkles"></i>
     </button>

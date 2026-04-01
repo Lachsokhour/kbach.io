@@ -10,7 +10,8 @@ import {
   formatHTML, 
   clearEditor, 
   undoClear, 
-  copyHTML 
+  copyHTML,
+  pasteHTML 
 } from './modules/editor.js';
 import { 
   onDimInput, 
@@ -117,6 +118,7 @@ window.onAutoHChange = onAutoHChange;
 window.formatHTML = formatHTML;
 window.clearEditor = clearEditor;
 window.copyHTML = copyHTML;
+window.pasteHTML = pasteHTML;
 window.reloadPreview = reloadPreview;
 window.toggleTheme = toggleTheme;
 window.exportPNG = exportPNG;

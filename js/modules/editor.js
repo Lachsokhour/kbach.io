@@ -1,4 +1,3 @@
-
 import { state } from './state.js';
 import { renderPreview } from './export.js';
 import { scheduleSave } from './storage.js';
@@ -117,4 +116,18 @@ export function copyHTML() {
   var val = state.jar ? state.jar.toString() : document.getElementById('html-editor').textContent;
   navigator.clipboard.writeText(val);
   import('./ui.js').then(ui => ui.showMsg('Copied!'));
+}
+
+export async function pasteHTML() {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) return;
+    if (state.jar) state.jar.updateCode(text);
+    else document.getElementById('html-editor').textContent = text;
+    onEditorChange();
+    import('./ui.js').then(ui => ui.showMsg('Pasted!'));
+  } catch (err) {
+    console.error('Failed to read clipboard', err);
+    import('./ui.js').then(ui => ui.showMsg('Paste failed', true));
+  }
 }
