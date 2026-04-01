@@ -22,7 +22,10 @@ window.addEventListener('DOMContentLoaded', function () {
     editorEl.addEventListener('scroll', syncScroll);
   }
 
-  loadTemplate('og');
+  if (!loadSettings()) {
+    loadTemplate('og');
+  }
+  
   document.getElementById('inp-w').addEventListener('change', onDimChange);
   document.getElementById('inp-h').addEventListener('change', onDimChange);
 });
@@ -44,6 +47,8 @@ window.copyImage = copyImage;
 window.toggleOutput = toggleOutput;
 window.undoClear = undoClear;
 window.syncScroll = syncScroll;
+window.updatePreviewSize = function() { applyScale(); scheduleSave(); };
+window.updateExportLabel = function() { updateExportLabel(); scheduleSave(); };
 
 function loadTemplate(name) {
   var t = TEMPLATES[name];
@@ -75,7 +80,10 @@ function onEditorChange() {
   updateLineNums();
   updateStats();
   clearTimeout(updateTimer);
-  updateTimer = setTimeout(renderPreview, 300);
+  updateTimer = setTimeout(function() {
+    renderPreview();
+    scheduleSave();
+  }, 300);
 }
 
 function syncScroll() {
@@ -110,6 +118,7 @@ function onDimChange() {
   }
   updateDimLabels();
   renderPreview();
+  scheduleSave();
 }
 
 function loadPreset() {
@@ -127,6 +136,7 @@ function loadPreset() {
 function onAutoHChange() {
   setAutoH(document.getElementById('auto-h').checked);
   renderPreview();
+  scheduleSave();
 }
 
 function setAutoH(on) {
@@ -289,6 +299,7 @@ function renderPreview() {
     iframe.onload = null;
     applyScale();
   }
+  scheduleSave();
 }
 
 // Listen for height reports from iframe
@@ -659,6 +670,7 @@ function onEffectChange() {
   document.getElementById('val-opac').textContent = effectOpac + '%';
 
   applyLiveEffects();
+  scheduleSave();
 }
 
 function applyLiveEffects(targetIframe) {
@@ -717,3 +729,93 @@ window.closeEffectsPanel = function() {
 window.resetEffects = resetEffects;
 window.onEffectChange = onEffectChange;
 
+
+// ─── Local Storage Persistence ──────────────────────────────────
+var saveTimerID = null;
+
+function scheduleSave() {
+  clearTimeout(saveTimerID);
+  saveTimerID = setTimeout(saveSettings, 1000);
+}
+
+function saveSettings() {
+  const settings = {
+    w: currentW,
+    h: currentH,
+    autoH: autoHeight,
+    presetSel: document.getElementById('preset-sel')?.value || '',
+    previewScale: document.getElementById('preview-scale')?.value || '0.5',
+    exportScale: document.getElementById('export-scale')?.value || '2',
+    watermark: document.getElementById('show-watermark')?.checked || false,
+    code: jar ? jar.toString() : document.getElementById('html-editor').textContent,
+    effects: {
+      blur: document.getElementById('rng-blur')?.value || 0,
+      noise: document.getElementById('rng-noise')?.value || 0,
+      sat: document.getElementById('rng-sat')?.value || 100,
+      opac: document.getElementById('rng-opac')?.value || 100
+    }
+  };
+  try {
+    localStorage.setItem('kbach_settings', JSON.stringify(settings));
+  } catch(e) { console.warn('Kbach: LocalStorage save failed', e); }
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem('kbach_settings');
+    if (!raw) return false;
+    const settings = JSON.parse(raw);
+    
+    currentW = settings.w || 1200;
+    currentH = settings.h || 630;
+    autoHeight = !!settings.autoH;
+    
+    if (document.getElementById('inp-w')) document.getElementById('inp-w').value = currentW;
+    if (document.getElementById('inp-h')) document.getElementById('inp-h').value = autoHeight ? '' : currentH;
+    setAutoH(autoHeight);
+    
+    if (settings.presetSel !== undefined && document.getElementById('preset-sel')) 
+      document.getElementById('preset-sel').value = settings.presetSel;
+    if (settings.previewScale !== undefined && document.getElementById('preview-scale')) 
+      document.getElementById('preview-scale').value = settings.previewScale;
+    if (settings.exportScale !== undefined && document.getElementById('export-scale')) 
+      document.getElementById('export-scale').value = settings.exportScale;
+    if (settings.watermark !== undefined && document.getElementById('show-watermark')) 
+      document.getElementById('show-watermark').checked = settings.watermark;
+    
+    if (settings.effects) {
+      if (document.getElementById('rng-blur')) document.getElementById('rng-blur').value = settings.effects.blur || 0;
+      if (document.getElementById('rng-noise')) document.getElementById('rng-noise').value = settings.effects.noise || 0;
+      if (document.getElementById('rng-sat')) document.getElementById('rng-sat').value = settings.effects.sat || 100;
+      if (document.getElementById('rng-opac')) document.getElementById('rng-opac').value = settings.effects.opac || 100;
+      
+      effectBlur = settings.effects.blur || 0;
+      effectNoise = settings.effects.noise || 0;
+      effectSat = settings.effects.sat || 100;
+      effectOpac = settings.effects.opac || 100;
+
+      if (document.getElementById('val-blur')) document.getElementById('val-blur').textContent = effectBlur + 'px';
+      if (document.getElementById('val-noise')) document.getElementById('val-noise').textContent = effectNoise + '%';
+      if (document.getElementById('val-sat')) document.getElementById('val-sat').textContent = effectSat + '%';
+      if (document.getElementById('val-opac')) document.getElementById('val-opac').textContent = effectOpac + '%';
+    }
+    
+    if (settings.code !== undefined) {
+      if (jar) jar.updateCode(settings.code);
+      else document.getElementById('html-editor').textContent = settings.code;
+    }
+    
+    updateDimLabels();
+    updateLineNums();
+    updateStats();
+    applyScale();
+    renderPreview();
+    
+    return true;
+  } catch (err) {
+    console.error('Kbach: Failed to load settings', err);
+    return false;
+  }
+}
+
+window.scheduleSave = scheduleSave;
