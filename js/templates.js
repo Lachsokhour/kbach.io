@@ -268,5 +268,96 @@ export const TEMPLATES = {
   <div class="note">ZWJ sequences · skin tones · flags · complex emoji</div>
 </body>
 </html>`
+  },
+  tailwind: {
+    w: 1200,
+    h: 630,
+    html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tailwind + Lucide Template</title>
+</head>
+<body class="bg-slate-900 flex flex-col items-center justify-center p-12 text-white">
+  <!-- Note: Features must be enabled for this to look right -->
+  
+  <div class="max-w-4xl w-full bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-3xl p-10 shadow-2xl">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <i data-lucide="zap" class="text-white w-8 h-8"></i>
+      </div>
+      <div>
+        <h1 class="text-4xl font-extrabold tracking-tight">Kbach.io <span class="text-emerald-400">Pro</span></h1>
+        <p class="text-slate-400 font-medium">Modern designs in seconds</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6 mb-10">
+      <div class="bg-slate-700/30 p-6 rounded-2xl border border-white/5">
+        <i data-lucide="wind" class="text-sky-400 mb-4 h-6 w-6"></i>
+        <h3 class="font-bold text-lg mb-1">Tailwind</h3>
+        <p class="text-sm text-slate-400">Utility-first CSS injection</p>
+      </div>
+      <div class="bg-slate-700/30 p-6 rounded-2xl border border-white/5">
+        <i data-lucide="box" class="text-purple-400 mb-4 h-6 w-6"></i>
+        <h3 class="font-bold text-lg mb-1">Lucide</h3>
+        <p class="text-sm text-slate-400">Vector icons rendered</p>
+      </div>
+      <div class="bg-slate-700/30 p-6 rounded-2xl border border-white/5">
+        <i data-lucide="type" class="text-amber-400 mb-4 h-6 w-6"></i>
+        <h3 class="font-bold text-lg mb-1">Google Fonts</h3>
+        <p class="text-sm text-slate-400">Dynamic font loading</p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-8 border-t border-white/5">
+      <div class="flex items-center gap-2 text-slate-400 text-sm">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+        <span>Ready for export</span>
+      </div>
+      <div class="text-slate-500 text-xs font-mono">v2.1 · Kbach.io</div>
+    </div>
+  </div>
+</body>
+</html>`
+  },
+  mastery: {
+    w: 1080,
+    h: 1080,
+    html: `<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <style>
+        body { font-family: 'Nunito', 'Kantumruy Pro', sans-serif; background: #0f172a; overflow: hidden; margin: 0; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glow-text { text-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+    </style>
+</head>
+<body class="flex items-center justify-center w-[1080px] h-[1080px] text-white">
+    <div class="relative w-full h-full p-12 flex flex-col items-center justify-center text-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div class="absolute top-20 left-20 w-64 h-64 bg-cyan-500 rounded-full blur-[120px] opacity-20"></div>
+        <div class="absolute bottom-20 right-20 w-64 h-64 bg-purple-500 rounded-full blur-[120px] opacity-20"></div>
+
+        <div class="glass p-16 rounded-[60px] w-full border-t-2 border-l-2 border-white/20 shadow-2xl">
+            <h2 class="text-cyan-400 text-4xl font-black mb-4 tracking-widest">ENGLISH MASTERY</h2>
+            <h1 class="text-8xl font-black mb-8 glow-text leading-tight uppercase">What's the<br><span class="text-white">Difference?</span></h1>
+            <div class="h-2 w-48 bg-cyan-400 mx-auto mb-10 rounded-full"></div>
+            <p class="text-4xl font-bold text-slate-300 leading-relaxed">
+                ពាក្យស្រដៀងគ្នាខ្លះ តែប្រើខុសគ្នាដាច់!<br>
+                <span class="text-white mt-4 block">តោះ! មករៀន <span class="text-cyan-400">របៀបប្រើប្រាស់</span> ទាំងអស់គ្នា។</span>
+            </p>
+        </div>
+
+        <div class="mt-12 flex items-center gap-4">
+            <div class="bg-cyan-500 text-slate-900 px-6 py-2 rounded-full font-black text-2xl">@learnwith_momo</div>
+        </div>
+    </div>
+</body>
+</html>`
   }
 };

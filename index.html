@@ -7,14 +7,15 @@
   <title>Kbach.io — ក្បាច់</title>
   <link rel="icon" type="image/png"
     href="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -144,6 +145,8 @@
         <button class="tpl-chip" onclick="loadTemplate('announce')">Announcement</button>
         <button class="tpl-chip" onclick="loadTemplate('ticket')">Event Ticket</button>
         <button class="tpl-chip" onclick="loadTemplate('receipt')">Receipt</button>
+        <button class="tpl-chip" onclick="loadTemplate('tailwind')"><i data-lucide="zap" style="width:10px;height:10px"></i> Tailwind Pro</button>
+        <button class="tpl-chip" onclick="loadTemplate('mastery')"><i data-lucide="sparkles" style="width:10px;height:10px"></i> Mastery</button>
         <button class="tpl-chip" onclick="loadTemplate('emoji')">Emoji Test</button>
       </div>
 
@@ -167,7 +170,8 @@
         <span class="pane-title">Preview</span>
         <span class="pane-badge" id="preview-size-badge">1200 × 630</span>
         <div style="flex:1"></div>
-        <button class="btn" onclick="toggleEffectsPanel()"><i data-lucide="sparkles"></i> Effects</button>
+        <button class="btn" onclick="toggleEffectsPanel()" title="Global visual effects"><i data-lucide="sparkles"></i> Effects</button>
+        <button class="btn" onclick="toggleFeaturesPanel()" title="Modern HTML features like Tailwind"><i data-lucide="layers"></i> Features</button>
         <button class="btn" onclick="reloadPreview()"><i data-lucide="refresh-cw"></i> Reload</button>
       </div>
 
@@ -228,6 +232,49 @@
           </div>
         </div>
         <!-- End Effects Panel -->
+
+        <!-- Features Panel -->
+        <div id="features-panel" class="effects-panel hidden">
+          <div class="ep-header">
+            <span class="ep-title">HTML Features</span>
+            <button class="ep-reset" onclick="closeFeaturesPanel()" aria-label="Close Panel">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <div class="ep-control">
+            <label class="feat-toggle">
+              <input type="checkbox" id="feat-tailwind" onchange="onFeatureChange()">
+              <span class="feat-label">Tailwind CSS (CDN)</span>
+            </label>
+            <p class="feat-desc">Enable Utility-first styling via Play CDN</p>
+          </div>
+
+          <div class="ep-control">
+            <label class="feat-toggle">
+              <input type="checkbox" id="feat-reset" onchange="onFeatureChange()">
+              <span class="feat-label">Modern CSS Reset</span>
+            </label>
+            <p class="feat-desc">Remove browser default styles & normalize</p>
+          </div>
+
+          <div class="ep-control">
+            <label class="feat-toggle">
+              <input type="checkbox" id="feat-lucide" onchange="onFeatureChange()">
+              <span class="feat-label">Lucide Icons Support</span>
+            </label>
+            <p class="feat-desc">Enable &lt;i data-lucide="..."&gt;&lt;/i&gt;</p>
+          </div>
+
+          <div class="ep-control">
+            <div class="ep-label-row">
+              <span class="ep-label">Google Fonts</span>
+            </div>
+            <input type="text" id="feat-fonts" class="ep-input" placeholder="e.g. Inter, Roboto, Pacifico" oninput="onFeatureChange()">
+            <p class="feat-desc">Comma-separated font family names</p>
+          </div>
+        </div>
+        <!-- End Features Panel -->
 
       </div>
 

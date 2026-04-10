@@ -1005,10 +1005,60 @@ body {
   color: #fff;
 }
 
-.effects-panel.hidden {
+.effects-panel.hidden,
+#features-panel.hidden {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10px) scale(0.98);
+}
+
+#features-panel {
+  top: 64px;
+}
+
+.ep-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ep-input:focus {
+  border-color: var(--accent);
+}
+
+.feat-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.feat-toggle input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+}
+
+.feat-label {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.feat-desc {
+  font-size: 10px;
+  color: #888;
+  margin-top: -4px;
+  padding-left: 25px;
 }
 
 .ep-header {

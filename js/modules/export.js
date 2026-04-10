@@ -17,31 +17,51 @@ export function renderPreview() {
   var doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open();
 
+  var injections = getInjectedHTML();
+  let fullHtml = '';
+  
+  if (html.toLowerCase().includes('<html')) {
+    fullHtml = html;
+    // Attempt to inject into existing head/body
+    if (fullHtml.includes('</head>')) {
+      fullHtml = fullHtml.replace('</head>', injections.match(/<link|<style|<script/g) ? injections.replace(/<div.*<\/div>/gs, '') + '</head>' : '</head>');
+    }
+    if (fullHtml.includes('</body>')) {
+      fullHtml = fullHtml.replace('</body>', injections.match(/<div/g) ? injections.match(/<div.*<\/div>/gs)[0] + '</body>' : '</body>');
+    }
+  } else {
+    fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">${injections}</head><body>${html}</body></html>`;
+  }
+
+  // Ensure all remote links and scripts have crossorigin="anonymous" to prevent SecurityError
+  fullHtml = fullHtml.replace(/<link([^>]+)href=["'](http[^"']+)["']([^>]*)/gi, function(match, p1, p2, p3) {
+    if (p1.includes('crossorigin') || p3.includes('crossorigin')) return match;
+    return '<link' + p1 + 'href="' + p2 + '" crossorigin="anonymous"' + p3;
+  });
+  fullHtml = fullHtml.replace(/<script([^>]+)src=["'](http[^"']+)["']([^>]*)/gi, function(match, p1, p2, p3) {
+    if (p1.includes('crossorigin') || p3.includes('crossorigin')) return match;
+    return '<script' + p1 + 'src="' + p2 + '" crossorigin="anonymous"' + p3;
+  });
+
   if (state.autoHeight) {
     var closeTag = '</' + 'script>';
     var probe = '<script>'
-      + '(function poll(attempts){'
-      + 'var h=Math.max('
-      + 'document.body?document.body.scrollHeight:0,'
-      + 'document.documentElement?document.documentElement.scrollHeight:0'
-      + ');'
-      + 'if(h>0){parent.postMessage({type:"autoH",h:h},"*");}'
-      + 'if(attempts>0)setTimeout(function(){poll(attempts-1);},150);'
-      + '})(6);'
+      + 'window.addEventListener("load", function() {'
+      + '  var updateH = function() {'
+      + '    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);'
+      + '    window.parent.postMessage({type:"autoH", h:h}, "*");'
+      + '  };'
+      + '  if (window.ResizeObserver) {'
+      + '    new ResizeObserver(updateH).observe(document.body);'
+      + '  }'
+      + '  updateH();'
+      + '});'
       + closeTag;
     
-    var watermark = getWatermarkHTML();
-    var injected = html.indexOf('</body>') !== -1 
-      ? html.replace('</body>', watermark + probe + '</body>') 
-      : html + watermark + probe;
-    doc.write(injected);
-  } else {
-    var watermark = getWatermarkHTML();
-    var injected = html.indexOf('</body>') !== -1 
-      ? html.replace('</body>', watermark + '</body>') 
-      : html + watermark;
-    doc.write(injected);
+    fullHtml = fullHtml.replace('</body>', probe + '</body>');
   }
+
+  doc.write(fullHtml);
   doc.close();
 
   import('./ui.js').then(ui => ui.applyLiveEffects());
@@ -84,184 +104,178 @@ export function exportPNG() {
   var exportScale = parseInt(document.getElementById('export-scale').value) || 2;
   import('./ui.js').then(ui => {
     ui.showLoading(true);
-    ui.showMsg('Rendering\u2026');
+    ui.showMsg('Rendering with High-Fidelity\u2026');
   });
 
-  var parser = new DOMParser();
-  var parsedHtml = parser.parseFromString(html, 'text/html');
-  var links = parsedHtml.querySelectorAll('link[rel="stylesheet"]');
-  var fontLoads = [];
-  
-  links.forEach(function(link) {
-    var href = link.getAttribute('href');
-    if (href && !document.querySelector('link[href="' + href + '"]')) {
-      var newLink = document.createElement('link');
-      newLink.rel = 'stylesheet';
-      newLink.href = href;
-      document.head.appendChild(newLink);
-      
-      fontLoads.push(new Promise(function(resolve) {
-        newLink.onload = resolve;
-        newLink.onerror = resolve;
-      }));
+  // Prepare full document for rendering
+  const injections = getInjectedHTML();
+  let fullHtml = '';
+  if (html.toLowerCase().includes('<html')) {
+    // If user provided a full document, inject features into head and body
+    fullHtml = html;
+    if (fullHtml.includes('</head>')) {
+      fullHtml = fullHtml.replace('</head>', injections.match(/<link|<style|<script/g) ? injections + '</head>' : '</head>');
     }
+    if (fullHtml.includes('</body>')) {
+      fullHtml = fullHtml.replace('</body>', injections.match(/<div/g) ? injections + '</body>' : '</body>');
+    }
+  } else {
+    fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">${injections}</head><body>${html}</body></html>`;
+  }
+
+  // Ensure all remote links and scripts have crossorigin="anonymous" to prevent SecurityError
+  fullHtml = fullHtml.replace(/<link([^>]+)href=["'](http[^"']+)["']([^>]*)/gi, function(match, p1, p2, p3) {
+    if (p1.includes('crossorigin') || p3.includes('crossorigin')) return match;
+    return '<link' + p1 + 'href="' + p2 + '" crossorigin="anonymous"' + p3;
+  });
+  fullHtml = fullHtml.replace(/<script([^>]+)src=["'](http[^"']+)["']([^>]*)/gi, function(match, p1, p2, p3) {
+    if (p1.includes('crossorigin') || p3.includes('crossorigin')) return match;
+    return '<script' + p1 + 'src="' + p2 + '" crossorigin="anonymous"' + p3;
   });
 
-  var readyPromise = fontLoads.length > 0 
-    ? Promise.all(fontLoads).then(function() { return new Promise(function(r) { setTimeout(r, 100); }); })
-    : Promise.resolve();
+  // Use a temporary hidden iframe for clean rendering environment
+  var offscreen = document.createElement('iframe');
+  offscreen.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + state.currentW + 'px;height:' + state.currentH + 'px;border:none;pointer-events:none;';
+  document.body.appendChild(offscreen);
 
-  readyPromise.then(function() {
-    var offscreen = document.createElement('iframe');
-    offscreen.style.cssText = 'position:fixed;left:-99999px;top:0;border:none;opacity:0;pointer-events:none;';
-    offscreen.width = state.currentW;
-    offscreen.height = state.currentH;
-    document.body.appendChild(offscreen);
-  
-    var resolved = false;
-    function doCapture() {
-      if (resolved) return;
-      resolved = true;
+  var doc = offscreen.contentDocument || offscreen.contentWindow.document;
+  doc.open();
+  doc.write(fullHtml);
+  doc.close();
+
+  // Wait for all assets (Tailwind, Fonts, Images) to load
+  const startRender = () => {
+    const target = doc.documentElement;
+    
+    htmlToImage.toPng(target, {
+      width: state.currentW,
+      height: state.currentH,
+      pixelRatio: exportScale,
+      backgroundColor: null,
+      cacheBust: true, // Prevent cached images from failing to render
+      style: {
+        transform: 'none',
+        left: '0',
+        top: '0'
+      }
+    })
+    .then(function(dataUrl) {
+      document.body.removeChild(offscreen);
       
-      setTimeout(function () {
-        try {
-          html2canvas(offscreen.contentDocument.documentElement, {
-            width: state.currentW,
-            height: state.currentH,
-            scale: exportScale,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: null,
-            logging: false,
-            windowWidth: state.currentW,
-            windowHeight: state.currentH,
-            scrollX: 0,
-            scrollY: 0
-          }).then(function (canvas) {
-            document.body.removeChild(offscreen);
-          
-            function finalizeExport(exportCanvas) {
-              var url = exportCanvas.toDataURL('image/png');
-              var actualW = exportCanvas.width;
-              var actualH = exportCanvas.height;
-
-              var thumb = document.getElementById('output-thumb');
-              if (thumb) {
-                thumb.src = url;
-                thumb.style.display = 'block';
-              }
-
-              var outInfo = document.getElementById('output-info');
-              if (outInfo) {
-                outInfo.innerHTML =
-                  '<div class="output-info-row">Dimensions: <span>' + actualW + ' \u00d7 ' + actualH + 'px</span></div>' +
-                  '<div class="output-info-row">Scale: <span>' + exportScale + '\u00d7</span></div>' +
-                  '<div class="output-info-row">Format: <span>PNG</span></div>';
-              }
-
-              var outBody = document.getElementById('output-body');
-              if (outBody) outBody.classList.add('open');
-              var outIcon = document.getElementById('out-icon');
-              if (outIcon) outIcon.classList.add('open');
-              var outBadge = document.getElementById('out-badge');
-              if (outBadge) outBadge.style.display = 'inline';
-
-              var now = new Date();
-              var ts = now.getFullYear() +
-                ('0' + (now.getMonth() + 1)).slice(-2) +
-                ('0' + now.getDate()).slice(-2) + '-' +
-                ('0' + now.getHours()).slice(-2) +
-                ('0' + now.getMinutes()).slice(-2) +
-                ('0' + now.getSeconds()).slice(-2);
-
-              var a = document.createElement('a');
-              a.href = url;
-              a.download = 'kbach-io-' + ts + '.png';
-              a.click();
-
-              import('./ui.js').then(ui => {
-                ui.showMsg('Exported \u2713');
-                ui.showLoading(false);
-              });
-            }
-
-            if (state.effectBlur == 0 && state.effectSat == 100 && state.effectOpac == 100 && state.effectNoise == 0) {
-              finalizeExport(canvas);
-              return;
-            }
-
-            var finalCanvas = document.createElement('canvas');
-            finalCanvas.width = canvas.width;
-            finalCanvas.height = canvas.height;
-            var ctx = finalCanvas.getContext('2d');
-
-            var blurFilter = state.effectBlur > 0 ? 'blur(' + (state.effectBlur * exportScale) + 'px) ' : '';
-            var satFilter = state.effectSat != 100 ? 'saturate(' + state.effectSat + '%) ' : '';
-            ctx.filter = (blurFilter + satFilter).trim() || 'none';
-            ctx.globalAlpha = state.effectOpac / 100;
-            
-            ctx.drawImage(canvas, 0, 0);
-
-            ctx.filter = 'none';
-            ctx.globalAlpha = 1.0;
-
-            if (state.effectNoise > 0) {
-              var noiseSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + finalCanvas.width + '" height="' + finalCanvas.height + '">' +
-                '<filter id="noiseFilter">' +
-                  '<feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>' +
-                '</filter>' +
-                '<rect width="100%" height="100%" filter="url(#noiseFilter)" opacity="' + (state.effectNoise / 100) + '" />' +
-              '</svg>';
-              
-              var svgBlob = new Blob([noiseSvg], {type: 'image/svg+xml;charset=utf-8'});
-              var URLObj = window.URL || window.webkitURL || window;
-              var svgUrl = URLObj.createObjectURL(svgBlob);
-              var img = new Image();
-              img.onload = function() {
-                ctx.drawImage(img, 0, 0);
-                URLObj.revokeObjectURL(svgUrl);
-                finalizeExport(finalCanvas);
-              };
-              img.onerror = function() {
-                URLObj.revokeObjectURL(svgUrl);
-                finalizeExport(finalCanvas); 
-              };
-              img.src = svgUrl;
-            } else {
-              finalizeExport(finalCanvas);
-            }
-
-          }).catch(function (err) {
-            console.error(err);
-            import('./ui.js').then(ui => {
-              ui.showMsg('Export failed', true);
-              ui.showLoading(false);
-            });
-          });
-        } catch (err) {
-          console.error(err);
-          import('./ui.js').then(ui => {
-            ui.showMsg('Export failed', true);
-            ui.showLoading(false);
-          });
+      const finalize = (finalUrl) => {
+        var thumb = document.getElementById('output-thumb');
+        if (thumb) {
+          thumb.src = finalUrl;
+          thumb.style.display = 'block';
         }
-      }, 500);
-    }
 
-    offscreen.onload = doCapture;
-    var doc = offscreen.contentDocument || offscreen.contentWindow.document;
-    doc.open();
-    
-    var watermark = getWatermarkHTML();
-    var injected = html.indexOf('</body>') !== -1 
-      ? html.replace('</body>', watermark + '</body>') 
-      : html + watermark;
-    
-    doc.write(injected);
-    doc.close();
-    
-    setTimeout(doCapture, 1200);
-  });
+        var outInfo = document.getElementById('output-info');
+        if (outInfo) {
+          outInfo.innerHTML =
+            '<div class="output-info-row">Dimensions: <span>' + (state.currentW * exportScale) + ' \u00d7 ' + (state.currentH * exportScale) + 'px</span></div>' +
+            '<div class="output-info-row">Scale: <span>' + exportScale + '\u00d7</span></div>' +
+            '<div class="output-info-row">Engine: <span style="color:var(--accent)">High-Fidelity</span></div>';
+        }
+
+        var outBody = document.getElementById('output-body');
+        if (outBody) outBody.classList.add('open');
+        var outIcon = document.getElementById('out-icon');
+        if (outIcon) outIcon.classList.add('open');
+        var outBadge = document.getElementById('out-badge');
+        if (outBadge) outBadge.style.display = 'inline';
+
+        var ts = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+        var a = document.createElement('a');
+        a.href = finalUrl;
+        a.download = 'kbach-' + ts + '.png';
+        a.click();
+
+        import('./ui.js').then(ui => {
+          ui.showMsg('Exported \u2713');
+          ui.showLoading(false);
+        });
+      };
+
+      // Re-apply effects (blur, saturation, noise) on the final canvas if needed
+      if (state.effectBlur == 0 && state.effectSat == 100 && state.effectOpac == 100 && state.effectNoise == 0) {
+        finalize(dataUrl);
+        return;
+      }
+
+      // If effects are present, we draw the PNG data URL to a canvas and apply them
+      const img = new Image();
+      img.onload = function() {
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = state.currentW * exportScale;
+        finalCanvas.height = state.currentH * exportScale;
+        const ctx = finalCanvas.getContext('2d');
+        
+        // High Quality Smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const blurFilter = state.effectBlur > 0 ? 'blur(' + (state.effectBlur * exportScale) + 'px) ' : '';
+        const satFilter = state.effectSat != 100 ? 'saturate(' + state.effectSat + '%) ' : '';
+        ctx.filter = (blurFilter + satFilter).trim() || 'none';
+        ctx.globalAlpha = state.effectOpac / 100;
+        ctx.drawImage(img, 0, 0, finalCanvas.width, finalCanvas.height);
+
+        ctx.filter = 'none';
+        ctx.globalAlpha = 1.0;
+
+        if (state.effectNoise > 0) {
+          applyNoiseToCanvas(finalCanvas, state.effectNoise, () => {
+            finalize(finalCanvas.toDataURL('image/png'));
+          });
+        } else {
+          finalize(finalCanvas.toDataURL('image/png'));
+        }
+      };
+      img.src = dataUrl;
+    })
+    .catch(function(err) {
+      console.error('Export failed:', err);
+      if (offscreen.parentNode) document.body.removeChild(offscreen);
+      import('./ui.js').then(ui => {
+        ui.showMsg('Export failed', true);
+        ui.showLoading(false);
+      });
+    });
+  };
+
+  // Wait for fonts to be ready or timeout after 3s
+  if (offscreen.contentWindow.document.fonts) {
+    Promise.race([
+      offscreen.contentWindow.document.fonts.ready,
+      new Promise(resolve => setTimeout(resolve, 3000))
+    ]).then(startRender);
+  } else {
+    setTimeout(startRender, 2000);
+  }
+}
+
+function applyNoiseToCanvas(canvas, noiseAmount, callback) {
+  const noiseSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + canvas.width + '" height="' + canvas.height + '">' +
+    '<filter id="noiseFilter">' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>' +
+    '</filter>' +
+    '<rect width="100%" height="100%" filter="url(#noiseFilter)" opacity="' + (noiseAmount / 100) + '" />' +
+  '</svg>';
+  
+  const svgBlob = new Blob([noiseSvg], {type: 'image/svg+xml;charset=utf-8'});
+  const URLObj = window.URL || window.webkitURL || window;
+  const svgUrl = URLObj.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = function() {
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    URLObj.revokeObjectURL(svgUrl);
+    callback();
+  };
+  img.onerror = function() {
+    URLObj.revokeObjectURL(svgUrl);
+    callback();
+  };
+  img.src = svgUrl;
 }
 
 export function updateExportLabel() {
@@ -275,34 +289,64 @@ export function updateExportLabel() {
   scheduleSave();
 }
 
-export function getWatermarkHTML() {
-  const show = document.getElementById('show-watermark')?.checked;
-  if (!show) return '';
+export function getInjectedHTML() {
+  let html = '';
   
-  return '<style>'
-    + '@import url("https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap");'
-    + 'body { position: relative; min-height: 100vh; margin: 0; }'
-    + '.kb-watermark {'
-    + '  position: absolute;'
-    + '  bottom: 0;'
-    + '  right: 0;'
-    + '  padding: 8px 14px;'
-    + '  font-family: "Kantumruy Pro", -apple-system, sans-serif;'
-    + '  font-size: 12px;'
-    + '  font-weight: 600;'
-    + '  color: rgba(0,0,0,0.45);'
-    + '  background: rgba(255,255,255,0.6);'
-    + '  backdrop-filter: blur(8px);'
-    + '  -webkit-backdrop-filter: blur(8px);'
-    + '  border-top-left-radius: 10px;'
-    + '  z-index: 999999;'
-    + '  pointer-events: none;'
-    + '  letter-spacing: 0.01em;'
-    + '  line-height: 1;'
-    + '  box-shadow: 0 0 0 1px rgba(0,0,0,0.05);'
-    + '}'
-    + '</style>'
-    + '<div class="kb-watermark">Made with Kbach.io \u2014 \u1780\u17d2\u1794\u17b6\u1785\u17cb</div>';
+  // 1. Watermark
+  const showWatermark = document.getElementById('show-watermark')?.checked;
+  if (showWatermark) {
+    html += `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" crossorigin="anonymous">`;
+    html += '<style>'
+      + '.kb-watermark {'
+      + '  position: absolute; bottom: 0; right: 0; padding: 8px 14px;'
+      + '  font-family: "Kantumruy Pro", -apple-system, sans-serif;'
+      + '  font-size: 11px; font-weight: 600; color: rgba(0,0,0,0.4);'
+      + '  background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);'
+      + '  -webkit-backdrop-filter: blur(8px); border-top-left-radius: 10px;'
+      + '  z-index: 999999; pointer-events: none; letter-spacing: 0.01em;'
+      + '  box-shadow: 0 0 0 1px rgba(0,0,0,0.05);'
+      + '}'
+      + '</style>'
+      + '<div class="kb-watermark">Made with Kbach.io \u2014 \u1780\u17d2\u1794\u17b6\u1785\u17cb</div>';
+  }
+
+  // 2. Modern Reset
+  if (state.useReset) {
+    html += '<style>'
+      + '*,::before,::after{box-sizing:border-box;margin:0;padding:0;}'
+      + 'html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}'
+      + 'body{line-height:inherit;min-height:100vh;}'
+      + 'img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle;max-width:100%;height:auto;}'
+      + 'h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit;}'
+      + 'ol,ul{list-style:none;}'
+      + '</style>';
+  } else {
+    // Basic body reset always
+    html += '<style>body { margin: 0; min-height: 100vh; position: relative; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }</style>';
+  }
+
+  // 3. Tailwind CDN
+  if (state.useTailwind) {
+    html += '<script src="https://cdn.tailwindcss.com" crossorigin="anonymous"></script>';
+  }
+
+  // 4. Lucide Icons
+  if (state.useLucide) {
+    html += '<script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>';
+    html += '<script>window.addEventListener("load", function(){ if(window.lucide) lucide.createIcons(); });</script>';
+  }
+
+  // 5. Google Fonts
+  if (state.googleFonts && state.googleFonts.trim()) {
+    const families = state.googleFonts.split(',').map(f => f.trim().replace(/\s+/g, '+')).join('&family=');
+    html += `<link rel="preconnect" href="https://fonts.googleapis.com">`;
+    html += `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`;
+    html += `<link href="https://fonts.googleapis.com/css2?family=${families}&display=swap" rel="stylesheet" crossorigin="anonymous">`;
+  }
+
+  return html;
 }
 
 export async function copyImage() {

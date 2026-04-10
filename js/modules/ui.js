@@ -116,11 +116,36 @@ export function closeOutput() {
 
 // ─── Live Effects Panel ────────────────────────────────────────
 export function toggleEffectsPanel() {
-  document.getElementById('effects-panel').classList.toggle('hidden');
+  const panel = document.getElementById('effects-panel');
+  const wasHidden = panel.classList.contains('hidden');
+  
+  if (wasHidden) {
+    closeFeaturesPanel();
+    closeOutput();
+  }
+  
+  panel.classList.toggle('hidden');
 }
 
 export function closeEffectsPanel() {
   document.getElementById('effects-panel').classList.add('hidden');
+}
+
+export function toggleFeaturesPanel() {
+  const panel = document.getElementById('features-panel');
+  const wasHidden = panel.classList.contains('hidden');
+  
+  // Close other panels if opening this one
+  if (wasHidden) {
+    closeEffectsPanel();
+    closeOutput();
+  }
+  
+  panel.classList.toggle('hidden');
+}
+
+export function closeFeaturesPanel() {
+  document.getElementById('features-panel').classList.add('hidden');
 }
 
 export function resetEffects() {
@@ -143,6 +168,16 @@ export function onEffectChange() {
   document.getElementById('val-opac').textContent = state.effectOpac + '%';
 
   applyLiveEffects();
+  scheduleSave();
+}
+
+export function onFeatureChange() {
+  state.useTailwind = document.getElementById('feat-tailwind').checked;
+  state.useReset = document.getElementById('feat-reset').checked;
+  state.useLucide = document.getElementById('feat-lucide').checked;
+  state.googleFonts = document.getElementById('feat-fonts').value;
+
+  renderPreview();
   scheduleSave();
 }
 

@@ -26,8 +26,11 @@ import {
   toggleOutput, 
   toggleEffectsPanel, 
   closeEffectsPanel, 
+  toggleFeaturesPanel,
+  closeFeaturesPanel,
   resetEffects, 
-  onEffectChange 
+  onEffectChange,
+  onFeatureChange
 } from './modules/ui.js';
 import { 
   renderPreview, 
@@ -128,8 +131,11 @@ window.undoClear = undoClear;
 window.syncScroll = syncScroll;
 window.toggleEffectsPanel = toggleEffectsPanel;
 window.closeEffectsPanel = closeEffectsPanel;
+window.toggleFeaturesPanel = toggleFeaturesPanel;
+window.closeFeaturesPanel = closeFeaturesPanel;
 window.resetEffects = resetEffects;
 window.onEffectChange = onEffectChange;
+window.onFeatureChange = onFeatureChange;
 window.updatePreviewSize = function() { applyScale(); scheduleSave(); };
 window.updateExportLabel = function() { updateExportLabel(); scheduleSave(); };
 window.scheduleSave = scheduleSave;

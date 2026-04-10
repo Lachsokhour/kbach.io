@@ -28,6 +28,12 @@ export function saveSettings() {
       noise: document.getElementById('rng-noise')?.value || 0,
       sat: document.getElementById('rng-sat')?.value || 100,
       opac: document.getElementById('rng-opac')?.value || 100
+    },
+    features: {
+      tailwind: state.useTailwind,
+      reset: state.useReset,
+      lucide: state.useLucide,
+      fonts: state.googleFonts
     }
   };
   try {
@@ -73,6 +79,18 @@ export function loadSettings() {
       if (document.getElementById('val-noise')) document.getElementById('val-noise').textContent = state.effectNoise + '%';
       if (document.getElementById('val-sat')) document.getElementById('val-sat').textContent = state.effectSat + '%';
       if (document.getElementById('val-opac')) document.getElementById('val-opac').textContent = state.effectOpac + '%';
+    }
+
+    if (settings.features) {
+      state.useTailwind = !!settings.features.tailwind;
+      state.useReset = !!settings.features.reset;
+      state.useLucide = !!settings.features.lucide;
+      state.googleFonts = settings.features.fonts || '';
+
+      if (document.getElementById('feat-tailwind')) document.getElementById('feat-tailwind').checked = state.useTailwind;
+      if (document.getElementById('feat-reset')) document.getElementById('feat-reset').checked = state.useReset;
+      if (document.getElementById('feat-lucide')) document.getElementById('feat-lucide').checked = state.useLucide;
+      if (document.getElementById('feat-fonts')) document.getElementById('feat-fonts').value = state.googleFonts;
     }
     
     if (settings.code !== undefined) {

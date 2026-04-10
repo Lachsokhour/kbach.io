@@ -14,5 +14,11 @@ export const state = {
   effectBlur: 0,
   effectNoise: 0,
   effectSat: 100,
-  effectOpac: 100
+  effectOpac: 100,
+
+  // Feature Flags
+  useTailwind: false,
+  useReset: false,
+  useLucide: false,
+  googleFonts: ''
 };
