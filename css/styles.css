@@ -313,7 +313,7 @@ body {
 /* ── Main layout ── */
 .main {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 4fr 6fr;
   flex: 1;
   overflow: hidden;
   min-height: 0;
@@ -325,6 +325,7 @@ body {
   flex-direction: column;
   border-right: 1px solid var(--border);
   min-height: 0;
+  min-width: 0;
 }
 
 .pane-header {
@@ -580,6 +581,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   min-height: 0;
+  min-width: 0;
 }
 
 .preview-viewport {
