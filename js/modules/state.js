@@ -19,6 +19,6 @@ export const state = {
   // Feature Flags
   useTailwind: false,
   useReset: false,
-  useLucide: false,
+  useLucide: true,
   googleFonts: ''
 };
