@@ -104,6 +104,32 @@ export function loadTemplate(name) {
     if (presetSel.options[i].value === matchVal) { matched = true; break; }
   }
   presetSel.value = matched ? matchVal : '';
+
+  // Auto-detect features
+  const htmlLower = t.html.toLowerCase();
+  
+  // Tailwind
+  if (htmlLower.includes('tailwindcss.com') || name === 'tailwind' || name === 'mastery' || t.html.includes('class="') || t.html.includes("class='")) {
+    // If it has classes and it's one of our modern templates, or mentions tailwind
+    if (name === 'tailwind' || name === 'mastery') {
+       state.useTailwind = true;
+       document.getElementById('feat-tailwind').checked = true;
+    }
+  }
+
+  // Lucide
+  if (t.html.includes('data-lucide') || htmlLower.includes('lucide')) {
+    state.useLucide = true;
+    document.getElementById('feat-lucide').checked = true;
+  }
+
+  // Google Fonts
+  if (htmlLower.includes('fonts.googleapis.com')) {
+    // Already has fonts in it, but we can sync the feature if it's empty
+    if (!state.googleFonts) {
+       // We could extract them but maybe just leave it
+    }
+  }
   
   updateDimLabels();
   updateLineNums();
