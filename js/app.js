@@ -76,6 +76,26 @@ window.addEventListener('DOMContentLoaded', function () {
       _resizeTimer = requestAnimationFrame(function () { _resizeTimer = null; applyScale(); });
     }).observe(viewport);
   }
+
+  // Receive auto-height updates from the preview iframe.
+  window.addEventListener('message', function (evt) {
+    if (!state.autoHeight || !evt || !evt.data || evt.data.type !== 'autoH') return;
+
+    var iframe = document.getElementById('preview-iframe');
+    if (!iframe || evt.source !== iframe.contentWindow) return;
+
+    var nextH = parseInt(evt.data.h, 10);
+    if (!Number.isFinite(nextH)) return;
+
+    // Clamp to keep UI stable with malformed content.
+    nextH = Math.max(1, Math.min(20000, nextH));
+    if (nextH === state.currentH) return;
+
+    state.currentH = nextH;
+    updateDimLabels();
+    applyScale();
+    scheduleSave();
+  });
 });
 
 // ─── Global Orchestration ────────────────────────────────────
