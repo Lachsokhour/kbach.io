@@ -3,6 +3,11 @@
   "name": "Kbach.io Previewer",
   "version": "1.0",
   "description": "Preview HTML from Gemini directly in Kbach.io",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "*://gemini.google.com/*",
@@ -33,6 +38,13 @@
     "service_worker": "background.js"
   },
   "action": {
+    "default_icon": "icon.png",
     "default_title": "Send HTML to Kbach.io"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icon.png"],
+      "matches": ["*://gemini.google.com/*"]
+    }
+  ]
 }

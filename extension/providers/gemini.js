@@ -63,9 +63,7 @@ function injectButtons() {
     const btn = document.createElement('button');
     btn.className = 'kbach-preview-btn';
     btn.innerHTML = `
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14.73 20.83L17.58 18l-2.85-2.83 1.42-1.41L19 16.59l2.85-2.83 1.41 1.41L20.41 18l2.85 2.83-1.41 1.41L19 19.41l-2.85 2.83-1.42-1.41zM21 9V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h8.17l-.84-2H5V5h14v4.17l2 2V9zM11 11h2v-2h-2v2zM7 11h2v-2H7v2zm8 0h2v-2h-2v2z" fill="currentColor"/>
-        </svg>
+        <img src="${chrome.runtime.getURL('icon.png')}" alt="Kbach.io" style="width: 18px; height: 18px; border-radius: 4px;">
     `;
     
     btn.title = "Preview HTML in Kbach.io";

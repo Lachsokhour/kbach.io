@@ -191,7 +191,8 @@ window.addEventListener('message', function (evt) {
   if (evt.data && evt.data.type === 'KBACH_LOAD_HTML' && evt.data.html) {
     if (typeof pasteHTML === 'function') {
       pasteHTML(evt.data.html);
-      showMsg('Loaded from Extension');
+      // Let the receiver know we got it so it stops retrying
+      window.postMessage({ type: 'KBACH_LOADED' }, '*');
     }
   }
 });

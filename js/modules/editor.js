@@ -120,16 +120,16 @@ export function copyHTML() {
   import('./ui.js').then(ui => ui.showMsg('Copied!'));
 }
 
-export async function pasteHTML() {
+export async function pasteHTML(code) {
   try {
-    const text = await navigator.clipboard.readText();
+    const text = code || await navigator.clipboard.readText();
     if (!text) return;
     if (state.jar) state.jar.updateCode(text);
     else document.getElementById('html-editor').textContent = text;
     onEditorChange();
-    import('./ui.js').then(ui => ui.showMsg('Pasted!'));
+    import('./ui.js').then(ui => ui.showMsg(code ? 'Loaded from Extension' : 'Pasted!'));
   } catch (err) {
-    console.error('Failed to read clipboard', err);
+    console.error('Failed to paste/load HTML', err);
     import('./ui.js').then(ui => ui.showMsg('Paste failed', true));
   }
 }
