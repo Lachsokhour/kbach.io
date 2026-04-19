@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Kbach.io Previewer",
+  "version": "1.0",
+  "description": "Preview HTML from Gemini directly in Kbach.io",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://gemini.google.com/*",
+    "*://kbach.io/*",
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://gemini.google.com/*"],
+      "js": ["providers/gemini.js"],
+      "css": ["content.css"]
+    },
+    {
+      "matches": [
+        "*://kbach.io/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "http://localhost:5500/*",
+        "http://127.0.0.1:5500/*"
+      ],
+      "js": ["kbach-receiver.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Send HTML to Kbach.io"
+  }
+}

@@ -185,3 +185,13 @@ window.onFeatureChange = onFeatureChange;
 window.updatePreviewSize = function() { applyScale(); scheduleSave(); };
 window.updateExportLabel = function() { updateExportLabel(); scheduleSave(); };
 window.scheduleSave = scheduleSave;
+
+// ─── Extension Integration ───────────────────────────────────
+window.addEventListener('message', function (evt) {
+  if (evt.data && evt.data.type === 'KBACH_LOAD_HTML' && evt.data.html) {
+    if (typeof pasteHTML === 'function') {
+      pasteHTML(evt.data.html);
+      showMsg('Loaded from Extension');
+    }
+  }
+});
