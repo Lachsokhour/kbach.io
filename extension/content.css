@@ -1,28 +1,26 @@
 .kbach-preview-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(49, 46, 129, 0.8);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  justify-content: center;
+  background: transparent;
+  color: var(--gm-color-on-surface-variant, #c4c7c5); /* Match Gemini icons */
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   cursor: pointer;
-  margin-left: 8px;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
+  margin-left: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .kbach-preview-btn:hover {
-  background: rgba(67, 56, 202, 1);
-  box-shadow: 0 0 10px rgba(67, 56, 202, 0.4);
+  background: rgba(255, 255, 255, 0.1); 
+  color: #fff;
 }
 
 .kbach-preview-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
 }
