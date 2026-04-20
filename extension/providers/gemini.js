@@ -1,6 +1,15 @@
 // Kbach.io Previewer - Gemini Provider
 
+function isContextValid() {
+  try {
+    return !!chrome.runtime && !!chrome.runtime.getManifest();
+  } catch (e) {
+    return false;
+  }
+}
+
 function injectButtons() {
+  if (!isContextValid()) return;
   // Find all pre elements
   const pres = document.querySelectorAll('pre, message-content code-block');
   
@@ -63,7 +72,7 @@ function injectButtons() {
     const btn = document.createElement('button');
     btn.className = 'kbach-preview-btn';
     btn.innerHTML = `
-        <img src="${chrome.runtime.getURL('icon.png')}" alt="Kbach.io" style="width: 18px; height: 18px; border-radius: 4px;">
+        <img src="${isContextValid() ? chrome.runtime.getURL('icon.png') : ''}" alt="Kbach.io" style="width: 18px; height: 18px; border-radius: 4px;">
     `;
     
     btn.title = "Preview HTML in Kbach.io";
@@ -83,15 +92,26 @@ function injectButtons() {
         rawCode = rawCode.replace(/^```html\n?/, '').replace(/\n?```$/, '');
         
         // Notify background script
-        chrome.runtime.sendMessage({
-            action: 'open_kbach',
-            html: rawCode
-        });
-        
-        // Visual feedback
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = 'Sent!';
-        setTimeout(() => btn.innerHTML = originalHtml, 2000);
+        try {
+            if (!isContextValid()) throw new Error('Context invalidated');
+            
+            chrome.runtime.sendMessage({
+                action: 'open_kbach',
+                html: rawCode
+            });
+            
+            // Visual feedback
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = 'Sent!';
+            setTimeout(() => {
+                if (isContextValid()) btn.innerHTML = originalHtml;
+            }, 2000);
+        } catch (err) {
+            console.error('[Kbach.io] Extension context lost. Please refresh the page.', err);
+            btn.innerHTML = 'Refresh page';
+            btn.style.color = 'red';
+            btn.title = "Extension updated. Please refresh the page to continue.";
+        }
     };
     
     if (header) {
@@ -123,6 +143,12 @@ injectButtons();
 
 // And observe mutations for dynamically loaded chats
 const observer = new MutationObserver((mutations) => {
+  if (!isContextValid()) {
+    observer.disconnect();
+    console.log('[Kbach.io] Context invalidated. Stopping observer.');
+    return;
+  }
+  
   let shouldInject = false;
   for (let m of mutations) {
       if (m.addedNodes.length > 0) {

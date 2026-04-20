@@ -1,5 +1,14 @@
+function isContextValid() {
+  try {
+    return !!chrome.runtime && !!chrome.runtime.getManifest();
+  } catch (e) {
+    return false;
+  }
+}
+
 // Check for pending HTML when page loads
-chrome.storage.local.get(['kbachPendingHTML'], (result) => {
+if (isContextValid()) {
+  chrome.storage.local.get(['kbachPendingHTML'], (result) => {
   if (result.kbachPendingHTML) {
     const htmlSnippet = result.kbachPendingHTML;
     console.log('[Kbach.io Previewer] Found pending HTML snippet. Attempting to send...');
@@ -13,7 +22,10 @@ chrome.storage.local.get(['kbachPendingHTML'], (result) => {
       if (evt.data && evt.data.type === 'KBACH_LOADED') {
         console.log('[Kbach.io Previewer] App confirmed receipt. Clearing...');
         clearInterval(retryTimer);
-        chrome.storage.local.remove('kbachPendingHTML');
+        
+        if (isContextValid()) {
+          chrome.storage.local.remove('kbachPendingHTML');
+        }
       }
     });
     
@@ -26,11 +38,14 @@ chrome.storage.local.get(['kbachPendingHTML'], (result) => {
 
       if (attempts >= maxAttempts) {
         clearInterval(retryTimer);
-        chrome.storage.local.remove('kbachPendingHTML');
+        if (isContextValid()) {
+          chrome.storage.local.remove('kbachPendingHTML');
+        }
       }
     };
 
     retryTimer = setInterval(trySend, 500);
     trySend(); // Send immediately
   }
-});
+  });
+}
