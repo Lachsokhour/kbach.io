@@ -41,6 +41,23 @@ export class AIMediator {
 
     if (this.apiKey) {
       this.initSDK();
+    } else {
+      this.loadDefaultConfig();
+    }
+  }
+
+  async loadDefaultConfig() {
+    try {
+      const resp = await fetch('/api/config');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data && data.apiKey) {
+        this.apiKey = data.apiKey;
+        this.initSDK();
+        console.log('Gemini API: Loaded default key from environment.');
+      }
+    } catch (err) {
+      console.warn('Gemini API: Could not load default config (expected if not on Vercel or no env set).');
     }
   }
 
