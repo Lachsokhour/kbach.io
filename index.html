@@ -4,325 +4,680 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kbach.io — ក្បាច់</title>
+  <title>Kbach AI Studio — ក្បាច់ 🎨</title>
   <link rel="icon" type="image/png"
     href="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" crossorigin="anonymous">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600&display=swap" rel="stylesheet" crossorigin="anonymous">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" crossorigin="anonymous"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: 'var(--accent)',
+            studioBg: 'var(--bg)',
+            studioSubtle: 'var(--bg-subtle)',
+            studioBorder: 'var(--border)',
+            studioBorderStrong: 'var(--border-strong)',
+            studioText: 'var(--text)',
+            studioMuted: 'var(--text-muted)',
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body>
+<body class="bg-studioBg text-studioText h-screen overflow-hidden flex flex-col antialiased safe-area-inset">
 
-  <!-- Top bar -->
-  <div class="topbar">
-    <div class="logo">
-      <img class="logo-img"
-        src="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo"
-        alt="logo">
-      <span style="font-family:'Nunito',sans-serif;font-weight:800;letter-spacing:-0.03em">Kbach.io</span><span
-        style="font-family:'Kantumruy Pro',sans-serif;font-weight:600;font-size:13px;opacity:0.55;margin-left:6px;letter-spacing:0.01em">ក្បាច់</span>
-      <div style="flex:1"></div>
-      <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle dark/light mode">
-        <i data-lucide="moon"></i>
+  <!-- Header -->
+  <header class="h-14 border-b border-studioBorder flex items-center px-4 bg-studioSubtle z-50 shrink-0">
+    <div class="flex items-center gap-3 pr-4 md:pr-6 border-r border-studioBorder h-full">
+      <img src="https://lh3.googleusercontent.com/a/ACg8ocKvFKZWo1wv_W9Z9pkpmZJHEDk8yyOn3LEF1ecQ4bxHwQKQ_9w=s192-c-mo"
+        class="w-7 h-7 md:w-8 md:h-8 rounded-lg">
+      <div class="flex flex-col select-none">
+        <span class="font-black text-xs md:text-sm tracking-tighter leading-none">KBACH <span
+            class="text-accent">STUDIO</span></span>
+        <span class="hidden md:block text-[9px] text-accent font-bold uppercase tracking-[0.2em] opacity-80">AI
+          Enhanced</span>
+      </div>
+    </div>
+
+    <!-- Desktop Controls -->
+    <div class="hidden lg:flex items-center gap-4 px-6 flex-1 h-full">
+      <div class="flex items-center gap-2 bg-black/5 dark:bg-white/5 p-1 rounded-lg glass-border">
+        <select id="preset-sel" onchange="loadPreset()"
+          class="bg-transparent text-[11px] font-bold px-2 focus:outline-none cursor-pointer">
+          <option value="">Dimensions</option>
+          <option value="1200,630">Twitter OG</option>
+          <option value="1080,1080">Instagram Sq</option>
+          <option value="1080,1920">Portrait</option>
+        </select>
+        <div class="h-3 w-px bg-studioBorder mx-1"></div>
+        <div class="flex items-center gap-2 text-[11px] font-bold">
+          <input id="inp-w" type="number" onchange="onDimChange()" oninput="onDimInput()"
+            class="w-12 bg-transparent text-center outline-none focus:text-accent">
+          <span class="opacity-30">&times;</span>
+          <input id="inp-h" type="number" onchange="onDimChange()" oninput="onDimInput()"
+            class="w-12 bg-transparent text-center outline-none focus:text-accent">
+        </div>
+        <label class="flex items-center cursor-pointer ml-1">
+          <input type="checkbox" id="auto-h" onchange="onAutoHChange()" class="hidden peer">
+          <div
+            class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase text-studioMuted peer-checked:bg-accent/20 peer-checked:text-accent transition-all">
+            Auto H</div>
+        </label>
+        <div class="h-3 w-px bg-studioBorder mx-1"></div>
+        <select id="export-scale-sel" onchange="onScaleChange()"
+          class="bg-transparent text-[10px] font-bold px-1 focus:outline-none cursor-pointer text-accent">
+          <option value="1">1x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex-1 lg:hidden"></div>
+
+    <div class="flex items-center gap-1 md:gap-1.5">
+      <button onclick="pasteHTML()"
+        class="hidden md:flex w-9 h-9 items-center justify-center hover:bg-studioBorder rounded-xl transition-all"
+        title="Paste Code"><i data-lucide="clipboard" class="w-4 h-4 text-studioMuted hover:text-accent"></i></button>
+      <button onclick="copyHTML()"
+        class="hidden md:flex w-9 h-9 items-center justify-center hover:bg-studioBorder rounded-xl transition-all"
+        title="Copy Code"><i data-lucide="copy" class="w-4 h-4 text-studioMuted hover:text-accent"></i></button>
+      <button onclick="toggleTheme()"
+        class="w-9 h-9 flex items-center justify-center hover:bg-studioBorder rounded-xl transition-all"
+        id="theme-btn"><i data-lucide="moon" class="w-4 h-4 text-studioMuted"></i></button>
+
+      <div class="w-px h-6 bg-studioBorder mx-1 md:mx-2"></div>
+
+      <button onclick="exportPNG()"
+        class="flex items-center gap-2 bg-accent text-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 transition-all">
+        <i data-lucide="download" class="w-3.5 h-3.5 md:w-4 md:h-4"></i> <span class="hidden xs:inline">Export</span>
+      </button>
+
+      <!-- Mobile Menu Trigger -->
+      <button onclick="toggleMobileSettings()"
+        class="lg:hidden w-9 h-9 flex items-center justify-center hover:bg-studioBorder rounded-xl transition-all ml-1">
+        <i data-lucide="settings" class="w-5 h-5 text-studioMuted"></i>
       </button>
     </div>
+  </header>
 
-    <div class="topbar-section" style="gap:6px">
-      <select class="scale-select" id="preset-sel" onchange="loadPreset()"
-        style="font-size:11px;padding:4px 8px;max-width:160px">
-        <option value="">Custom</option>
-        <optgroup label="Social">
-          <option value="1200,630">OG / Twitter — 1200×630</option>
-          <option value="1080,1080">Instagram Square — 1080×1080</option>
-          <option value="1080,1920">Instagram Story — 1080×1920</option>
-          <option value="1080,566">Instagram Landscape — 1080×566</option>
-          <option value="1200,628">Facebook Post — 1200×628</option>
-          <option value="820,312">Facebook Cover — 820×312</option>
-          <option value="1500,500">Twitter Header — 1500×500</option>
-          <option value="800,800">LinkedIn Post — 800×800</option>
-          <option value="1128,191">LinkedIn Banner — 1128×191</option>
-        </optgroup>
-        <optgroup label="Presentation">
-          <option value="1920,1080">Full HD 16:9 — 1920×1080</option>
-          <option value="2560,1440">2K — 2560×1440</option>
-          <option value="1280,720">HD 720p — 1280×720</option>
-          <option value="1024,768">XGA 4:3 — 1024×768</option>
-        </optgroup>
-        <optgroup label="Print (px @96dpi)">
-          <option value="794,1123">A4 Portrait — 794×1123</option>
-          <option value="1123,794">A4 Landscape — 1123×794</option>
-          <option value="816,1056">US Letter — 816×1056</option>
-        </optgroup>
-        <optgroup label="Cards">
-          <option value="600,360">Profile Card — 600×360</option>
-          <option value="900,380">Event Ticket — 900×380</option>
-          <option value="420,680">Receipt — 420×680</option>
-        </optgroup>
-      </select>
-    </div>
+  <!-- Workspace -->
+  <main class="flex-1 flex overflow-hidden relative">
 
-    <div class="topbar-section" style="gap:6px; flex-direction:row; align-items:center;">
-      <span class="topbar-label" style="margin-left:4px">W</span>
-      <input class="dim-input" id="inp-w" type="number" value="1200" min="100" max="4000" oninput="onDimInput()">
-      <span class="dim-x">×</span>
-      <span class="topbar-label">H</span>
-      <input class="dim-input" id="inp-h" type="number" value="630" min="100" max="4000" oninput="onDimInput()"
-        placeholder="auto">
-      <label class="auto-h-toggle" title="Auto-detect height from content">
-        <input type="checkbox" id="auto-h" onchange="onAutoHChange()">
-        <span class="auto-h-label">auto H</span>
-      </label>
-    </div>
+    <!-- Sidebar (Desktop) -->
+    <aside
+      class="hidden lg:flex w-16 border-r border-studioBorder bg-studioSubtle flex-col items-center py-6 gap-8 z-40 relative transition-all"
+      id="main-sidebar">
+      <button
+        class="sidebar-tab w-10 h-10 flex items-center justify-center rounded-lg hover:bg-accent/10 text-studioMuted hover:text-accent transition-all"
+        onclick="switchSidebar('templates')" title="Templates"><i data-lucide="layout-grid"
+          class="w-5 h-5"></i></button>
+      <button
+        class="sidebar-tab w-10 h-10 flex items-center justify-center rounded-lg hover:bg-accent/10 text-studioMuted hover:text-accent transition-all"
+        onclick="switchSidebar('effects')" title="Effects"><i data-lucide="sparkles" class="w-5 h-5"></i></button>
+      <button
+        class="sidebar-tab w-10 h-10 flex items-center justify-center rounded-lg hover:bg-accent/10 text-studioMuted hover:text-accent transition-all"
+        onclick="switchSidebar('features')" title="Features"><i data-lucide="layers" class="w-5 h-5"></i></button>
 
-    <div class="topbar-section">
-      <span class="topbar-label">Scale</span>
-      <select class="topbar-select" id="preview-scale" onchange="updatePreviewSize()">
-        <option value="0.2">20%</option>
-        <option value="0.25">25%</option>
-        <option value="0.33">33%</option>
-        <option value="0.5" selected>50%</option>
-        <option value="0.67">67%</option>
-        <option value="0.75">75%</option>
-        <option value="1">100%</option>
-      </select>
-    </div>
-
-    <div class="topbar-section">
-      <span class="topbar-label">Export @</span>
-      <select class="scale-select" id="export-scale" onchange="updateExportLabel()">
-        <option value="1">1× — standard</option>
-        <option value="2" selected>2× — retina</option>
-        <option value="3">3× — high res</option>
-        <option value="4">4× — ultra HD</option>
-      </select>
-      <span class="topbar-label" id="export-px-label" style="font-size:9px;color:var(--muted);letter-spacing:0"></span>
-    </div>
-
-    <div class="topbar-section">
-      <label class="auto-h-toggle" title="Show branding watermark on image">
-        <input type="checkbox" id="show-watermark" onchange="renderPreview()">
-        <span class="auto-h-label">Watermark</span>
-      </label>
-    </div>
-
-    <div class="spacer"></div>
-
-    <!-- Removed btn-theme from here -->
-    <button class="btn btn-copy-html" onclick="copyHTML()" aria-label="Copy HTML to clipboard">
-      <i data-lucide="copy"></i> Copy HTML
-    </button>
-    <button class="btn btn-export" onclick="exportPNG()" aria-label="Export PNG image">
-      <i data-lucide="download"></i> Export PNG
-    </button>
-  </div>
-
-  <!-- Main -->
-  <div class="main">
-
-    <!-- Editor -->
-    <div class="editor-pane">
-      <div class="pane-header">
-        <span class="pane-title">HTML Editor</span>
-        <span class="pane-badge live" id="live-badge"><i data-lucide="circle" class="live-dot"></i> live</span>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="pasteHTML()"><i data-lucide="clipboard"></i> <span class="btn-text">Paste</span></button>
-        <button class="btn" onclick="formatHTML()"><i data-lucide="sparkles"></i> <span class="btn-text">Format</span></button>
-        <button class="btn btn-clear-action" id="btn-clear" onclick="clearEditor()"><i data-lucide="trash-2"></i> <span class="btn-text">Clear</span></button>
+      <div class="mt-auto pb-4">
+        <button onclick="toggleEditor()"
+          class="w-10 h-10 flex items-center justify-center rounded-xl text-studioMuted hover:bg-studioBorder transition-all"
+          title="Toggle Code"><i data-lucide="code-2" class="w-5 h-5"></i></button>
       </div>
 
-      <div class="tpl-row" id="tpl-row">
-        <button class="tpl-chip" onclick="loadTemplate('og')">OG Card 1200×630</button>
-        <button class="tpl-chip" onclick="loadTemplate('quote')">Quote Card</button>
-        <button class="tpl-chip" onclick="loadTemplate('profile')">Profile Card</button>
-        <button class="tpl-chip" onclick="loadTemplate('announce')">Announcement</button>
-        <button class="tpl-chip" onclick="loadTemplate('ticket')">Event Ticket</button>
-        <button class="tpl-chip" onclick="loadTemplate('receipt')">Receipt</button>
-        <button class="tpl-chip" onclick="loadTemplate('tailwind')"><i data-lucide="zap" style="width:10px;height:10px"></i> Tailwind Pro</button>
-        <button class="tpl-chip" onclick="loadTemplate('mastery')"><i data-lucide="sparkles" style="width:10px;height:10px"></i> Mastery</button>
-        <button class="tpl-chip" onclick="loadTemplate('emoji')">Emoji Test</button>
-      </div>
-
-      <div class="editor-area">
-        <div class="editor-lines" id="line-nums"></div>
-        <div id="html-editor" class="language-markup" spellcheck="false" autocomplete="off" autocorrect="off"></div>
-      </div>
-
-      <div class="editor-status">
-        <span id="status-chars">0 chars</span>
-        <span id="status-lines">0 lines</span>
-        <span class="status-pill" id="status-dim">1200 × 630</span>
-        <div style="flex:1"></div>
-        <span id="status-msg" style="color:var(--accent)"></span>
-      </div>
-    </div>
-
-    <!-- Preview -->
-    <div class="preview-pane">
-      <div class="pane-header">
-        <span class="pane-title">Preview</span>
-        <span class="pane-badge" id="preview-size-badge">1200 × 630</span>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="toggleEffectsPanel()" title="Global visual effects"><i data-lucide="sparkles"></i> Effects</button>
-        <button class="btn" onclick="toggleFeaturesPanel()" title="Modern HTML features like Tailwind"><i data-lucide="layers"></i> Features</button>
-        <button class="btn" onclick="reloadPreview()"><i data-lucide="refresh-cw"></i> Reload</button>
-      </div>
-
-      <div class="preview-viewport" id="preview-viewport">
-        <div class="preview-wrap" id="preview-wrap">
-          <div class="preview-frame-label" id="frame-label">1200 × 630px</div>
-          <iframe id="preview-iframe" width="1200" height="630"></iframe>
-        </div>
-        <div class="preview-loading" id="preview-loading">
-          <div class="spinner"></div>
-          <span>Generating image…</span>
-        </div>
-
-        <!-- Effects Panel -->
-        <div id="effects-panel" class="effects-panel hidden">
-          <div class="ep-header">
-            <span class="ep-title">Effects</span>
-            <div style="display:flex; gap: 4px;">
-              <button class="ep-reset" onclick="resetEffects()" aria-label="Reset Effects" title="Reset to defaults">
-                <i data-lucide="rotate-ccw"></i>
-              </button>
-              <button class="ep-reset" onclick="closeEffectsPanel()" aria-label="Close Panel" title="Close Panel">
-                <i data-lucide="x"></i>
-              </button>
-            </div>
+      <!-- Popout -->
+      <div
+        class="absolute left-16 top-0 bottom-0 overflow-y-auto glass shadow-2xl transition-all duration-300 w-0 opacity-0 z-50 overflow-hidden"
+        id="sidebar-panels-container">
+        <div id="panel-templates" class="sidebar-panel p-6 w-64">
+          <div class="flex items-center mb-6">
+            <span class="text-[10px] font-black uppercase tracking-widest text-studioMuted">Templates</span>
+            <button onclick="closeSidebar()" class="ml-auto opacity-50 hover:opacity-100"><i data-lucide="x"
+                class="w-4 h-4 text-studioMuted"></i></button>
           </div>
-          
-          <div class="ep-control">
-            <div class="ep-label-row">
-              <span class="ep-label">Blur</span>
-              <span class="ep-value" id="val-blur">0px</span>
-            </div>
-            <input type="range" class="ep-slider" id="rng-blur" min="0" max="20" step="1" value="0" oninput="onEffectChange()">
-          </div>
-
-          <div class="ep-control">
-            <div class="ep-label-row">
-              <span class="ep-label">Noise</span>
-              <span class="ep-value" id="val-noise">0%</span>
-            </div>
-            <input type="range" class="ep-slider" id="rng-noise" min="0" max="100" step="1" value="0" oninput="onEffectChange()">
-          </div>
-
-          <div class="ep-control">
-            <div class="ep-label-row">
-              <span class="ep-label">Saturation</span>
-              <span class="ep-value" id="val-sat">100%</span>
-            </div>
-            <input type="range" class="ep-slider" id="rng-sat" min="0" max="200" step="1" value="100" oninput="onEffectChange()">
-          </div>
-
-          <div class="ep-control">
-            <div class="ep-label-row">
-              <span class="ep-label">Opacity</span>
-              <span class="ep-value" id="val-opac">100%</span>
-            </div>
-            <input type="range" class="ep-slider" id="rng-opac" min="0" max="100" step="1" value="100" oninput="onEffectChange()">
+          <div class="grid gap-3">
+            <button
+              class="w-full text-left p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-white/5 hover:border-accent text-[11px] font-bold transition-all"
+              onclick="loadTemplate('og')">Twitter OG Card</button>
+            <button
+              class="w-full text-left p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-white/5 hover:border-accent text-[11px] font-bold transition-all"
+              onclick="loadTemplate('quote')">Premium Quote</button>
+            <button
+              class="w-full text-left p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-white/5 hover:border-accent text-[11px] font-bold transition-all"
+              onclick="loadTemplate('mastery')">Studio Mastery</button>
           </div>
         </div>
-        <!-- End Effects Panel -->
 
-        <!-- Features Panel -->
-        <div id="features-panel" class="effects-panel hidden">
-          <div class="ep-header">
-            <span class="ep-title">HTML Features</span>
-            <button class="ep-reset" onclick="closeFeaturesPanel()" aria-label="Close Panel">
-              <i data-lucide="x"></i>
+        <div id="panel-effects" class="sidebar-panel p-6 w-64 hidden">
+          <div class="flex items-center mb-6">
+            <span class="text-[10px] font-black uppercase tracking-widest text-studioMuted">Visual Filters</span>
+            <button onclick="closeSidebar()" class="ml-auto opacity-50 hover:opacity-100"><i data-lucide="x"
+                class="w-4 h-4 text-studioMuted"></i></button>
+          </div>
+          <div class="space-y-6">
+            <div class="space-y-3">
+              <div class="flex justify-between text-[10px] font-bold uppercase opacity-60"><span>Blur</span> <span
+                  id="val-blur">0px</span></div>
+              <input type="range" id="rng-blur" min="0" max="20" step="1" value="0" oninput="onEffectChange()"
+                class="w-full accent-accent bg-studioBorder h-1 rounded-full appearance-none">
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between text-[10px] font-bold uppercase opacity-60"><span>Noise</span> <span
+                  id="val-noise">0%</span></div>
+              <input type="range" id="rng-noise" min="0" max="100" step="1" value="0" oninput="onEffectChange()"
+                class="w-full accent-accent bg-studioBorder h-1 rounded-full appearance-none">
+            </div>
+            <button onclick="resetEffects()"
+              class="w-full py-2 bg-studioBorder text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-studioBorderStrong">Reset
+              Effects</button>
+          </div>
+        </div>
+
+        <div id="panel-features" class="sidebar-panel p-6 w-64 hidden">
+          <div class="flex items-center mb-6">
+            <span class="text-[10px] font-black uppercase tracking-widest text-studioMuted">Advanced Features</span>
+            <button onclick="closeSidebar()" class="ml-auto opacity-50 hover:opacity-100"><i data-lucide="x"
+                class="w-4 h-4 text-studioMuted"></i></button>
+          </div>
+          <div class="space-y-4">
+            <label
+              class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:border-accent/30 transition-all">
+              <span class="text-[11px] font-bold">Tailwind Engine</span>
+              <input type="checkbox" id="feat-tailwind" onchange="onFeatureChange('tailwind')" class="accent-accent">
+            </label>
+            <label
+              class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:border-accent/30 transition-all">
+              <span class="text-[11px] font-bold">Lucide Icons</span>
+              <input type="checkbox" id="feat-lucide" onchange="onFeatureChange('lucide')" class="accent-accent">
+            </label>
+            <label
+              class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:border-accent/30 transition-all">
+              <span class="text-[11px] font-bold">Show Watermark</span>
+              <input type="checkbox" id="show-watermark" onchange="renderPreview()" class="accent-accent" checked>
+            </label>
+            <div class="space-y-2 pt-2">
+              <label class="text-[9px] font-black uppercase tracking-widest text-studioMuted px-1">Custom Google Fonts</label>
+              <input type="text" id="feat-fonts" onchange="onFeatureChange()" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[11px] focus:outline-none focus:border-accent transition-all" placeholder="e.g. Inter, Nunito">
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Canvas -->
+    <section
+      class="flex-1 relative bg-studioBg studio-grid overflow-hidden flex flex-col items-center justify-start pt-0 p-4 md:p-12">
+      <div class="canvas-viewport relative flex items-start justify-center w-full h-full overflow-auto scrollbar-hide pt-8 md:pt-12"
+        id="preview-viewport">
+        <div class="relative transition-all duration-300" id="preview-wrap">
+          <div
+            class="absolute -top-6 left-0 text-[9px] md:text-[10px] font-black tracking-widest text-accent uppercase opacity-50"
+            id="frame-label">1200 &times; 630 px</div>
+          <iframe id="preview-iframe" width="1200" height="630" class="glass shadow-2xl rounded-sm"></iframe>
+        </div>
+
+        <div id="preview-loading"
+          class="absolute inset-0 glass flex flex-col items-center justify-center gap-4 opacity-0 pointer-events-none transition-opacity duration-300 z-10">
+          <div class="w-10 h-10 border-2 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+          <span class="text-[9px] font-black uppercase tracking-[0.3em] text-accent animate-pulse">Rendering
+            Studio</span>
+        </div>
+
+        <div id="ai-scanner" class="absolute inset-0 pointer-events-none z-20 overflow-hidden hidden">
+          <div
+            class="w-full h-1 bg-accent/40 shadow-[0_0_20px_var(--accent)] animate-[scanner_2s_ease-in-out_infinite]">
+          </div>
+          <div class="absolute inset-0 bg-accent/5"></div>
+        </div>
+      </div>
+
+      <div id="editor-container"
+        class="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 h-[400px] md:h-[500px] glass rounded-2xl overflow-hidden translate-y-[550px] transition-transform duration-500 z-[100] shadow-2xl">
+        <div
+          class="h-10 px-6 flex items-center bg-white/5 border-b border-white/5 cursor-pointer hover:bg-white/10 transition-all font-black text-[10px] tracking-widest text-studioMuted"
+          onclick="toggleEditor()">
+          <i data-lucide="chevron-up" class="w-4 h-4 mr-3" id="editor-arrow"></i>
+          LOGIC EDITOR
+          <div class="ml-auto flex items-center gap-4 md:gap-6">
+            <button onclick="formatHTML()" class="hover:text-accent transition-all flex items-center gap-2"><i
+                data-lucide="sparkles" class="w-3 h-3"></i> <span class="hidden xs:inline">Format</span></button>
+            <button onclick="clearEditor()" class="hover:text-red-500 transition-all flex items-center gap-2"><i
+                data-lucide="trash-2" class="w-3 h-3"></i> <span class="hidden xs:inline">Clear</span></button>
+          </div>
+        </div>
+        <div class="flex-1 h-[calc(100%-68px)] flex">
+          <div id="line-nums"
+            class="w-10 md:w-12 bg-black/10 border-r border-white/5 flex flex-col items-end py-4 md:py-6 text-[9px] md:text-[10px] font-mono text-studioMuted/40 select-none leading-[18px] md:leading-[20px]">
+          </div>
+          <div id="html-editor"
+            class="flex-1 p-4 md:p-6 font-mono text-xs md:text-sm overflow-auto language-markup focus:outline-none leading-[18px] md:leading-[20px]"
+            spellcheck="false" contenteditable="true"></div>
+        </div>
+        <div
+          class="h-8 px-6 bg-white/5 flex items-center justify-between text-[9px] font-black uppercase text-studioMuted opacity-50">
+          <div><span id="status-chars">0</span> CHARS — <span id="status-lines">0</span> LINES</div>
+          <div id="status-msg" class="text-accent"></div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Nav -->
+      <nav
+        class="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-studioSubtle border-t border-studioBorder flex items-center justify-around px-4 z-[80] safe-area-bottom">
+        <button class="mob-nav-btn flex flex-col items-center gap-1 text-studioMuted hover:text-accent transition-all"
+          onclick="pasteHTML()">
+          <i data-lucide="clipboard" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold uppercase tracking-tighter">Paste</span>
+        </button>
+        <button class="mob-nav-btn flex flex-col items-center gap-1 text-studioMuted hover:text-accent transition-all"
+          onclick="toggleMobilePanel('effects')">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold uppercase tracking-tighter">Effects</span>
+        </button>
+        <button
+          class="w-14 h-14 -mt-10 bg-accent text-white rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(16,185,129,0.4)] active:scale-90 transition-all border-4 border-studioSubtle"
+          onclick="exportPNG()">
+          <i data-lucide="download" class="w-6 h-6"></i>
+        </button>
+        <button class="mob-nav-btn flex flex-col items-center gap-1 text-studioMuted hover:text-accent transition-all"
+          onclick="toggleEditor()">
+          <i data-lucide="code-2" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold uppercase tracking-tighter">Code</span>
+        </button>
+        <button class="mob-nav-btn flex flex-col items-center gap-1 text-studioMuted hover:text-accent transition-all"
+          onclick="toggleAIChat()">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold uppercase tracking-tighter">Copilot</span>
+        </button>
+      </nav>
+
+
+      <!-- Mobile Settings Overlay -->
+      <div id="mobile-settings-overlay"
+        class="fixed inset-0 z-[150] bg-black/60 backdrop-blur-xl hidden lg:hidden animate-in fade-in duration-300">
+        <div
+          class="absolute bottom-0 left-0 right-0 glass rounded-t-[2.5rem] p-8 pb-12 translate-y-full transition-transform duration-500"
+          id="mobile-settings-panel">
+          <div class="flex items-center justify-between mb-8">
+            <h3 class="font-black text-xs uppercase tracking-widest text-accent">Canvas Settings</h3>
+            <button onclick="toggleMobileSettings()"><i data-lucide="x" class="w-6 h-6 text-studioMuted"></i></button>
+          </div>
+
+          <div class="space-y-8">
+            <div class="space-y-4">
+              <label class="text-[10px] font-black uppercase tracking-widest text-studioMuted">Dimensions</label>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span class="text-[9px] block mb-1 opacity-50 uppercase font-black">Width</span>
+                  <input id="mob-inp-w" type="number" onchange="syncDimInputs('w')"
+                    class="bg-transparent w-full font-black text-lg focus:outline-none">
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span class="text-[9px] block mb-1 opacity-50 uppercase font-black">Height</span>
+                  <input id="mob-inp-h" type="number" onchange="syncDimInputs('h')"
+                    class="bg-transparent w-full font-black text-lg focus:outline-none">
+                </div>
+              </div>
+              <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <button onclick="applyPreset('1200,630')"
+                  class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold whitespace-nowrap">Twitter
+                  OG</button>
+                <button onclick="applyPreset('1080,1080')"
+                  class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold whitespace-nowrap">Insta
+                  Square</button>
+                <button onclick="applyPreset('1080,1920')"
+                  class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-bold whitespace-nowrap">Portrait</button>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <label class="text-[10px] font-black uppercase tracking-widest text-studioMuted">Export Quality</label>
+              <div class="flex gap-2">
+                <button onclick="setExportScale(1)"
+                  class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-black mob-scale-btn"
+                  data-scale="1">1x</button>
+                <button onclick="setExportScale(2)"
+                  class="flex-1 py-3 rounded-2xl bg-accent text-white text-xs font-black mob-scale-btn"
+                  data-scale="2">2x</button>
+                <button onclick="setExportScale(3)"
+                  class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-black mob-scale-btn"
+                  data-scale="3">3x</button>
+                <button onclick="setExportScale(4)"
+                  class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-black mob-scale-btn"
+                  data-scale="4">4x</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+              <span class="text-[11px] font-black uppercase tracking-widest">Auto Height</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="mob-auto-h" onchange="syncAutoH()" class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent">
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Panel Drawer (Templates/Effects/Features) -->
+      <div id="mobile-drawer-overlay"
+        class="fixed inset-0 z-[160] bg-black/60 backdrop-blur-xl hidden lg:hidden animate-in fade-in duration-300">
+        <div
+          class="absolute bottom-0 left-0 right-0 glass rounded-t-[2.5rem] max-h-[80vh] flex flex-col translate-y-full transition-transform duration-500"
+          id="mobile-drawer-panel">
+          <div class="p-6 border-b border-white/5 flex items-center justify-between shrink-0">
+            <span id="mobile-drawer-title"
+              class="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Panel</span>
+            <button onclick="toggleMobilePanel()"><i data-lucide="x" class="w-6 h-6 text-studioMuted"></i></button>
+          </div>
+          <div id="mobile-drawer-content" class="p-6 overflow-y-auto flex-1 pb-12">
+            <!-- Content injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Commander -->
+      <div id="ai-chat-sidebar"
+        class="fixed bottom-20 right-4 left-4 md:bottom-8 md:right-8 md:left-auto md:w-80 z-[70] flex flex-col gap-4 pointer-events-none transition-all duration-300">
+        <!-- Messages Bubble -->
+        <div id="ai-panel-inner"
+          class="w-full glass rounded-2xl shadow-2xl overflow-hidden hidden animate-in slide-in-from-bottom-5 pointer-events-auto border border-studioBorderStrong">
+          <div class="px-5 py-3 border-b border-white/5 flex items-center justify-between">
+            <span class="text-[9px] font-black uppercase tracking-widest text-studioMuted">Copilot Feed</span>
+            <button onclick="toggleAIChat()" class="text-studioMuted hover:text-accent transition-colors"><i
+                data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+          <div class="p-4 md:p-5 h-[350px] md:h-[450px] overflow-y-auto flex flex-col gap-4 custom-scrollbar"
+            id="ai-messages">
+            <!-- Initial Message -->
+            <div class="chat-animate bg-accent/5 border border-accent/10 p-4 rounded-lg text-[11px] leading-relaxed">
+              <div class="flex items-center gap-2 mb-2 text-accent font-black uppercase tracking-widest text-[8px]">
+                <i data-lucide="sparkles" class="w-3 h-3"></i> Copilot Active
+              </div>
+              <p class="opacity-80">I am scanning your canvas. State your design intent to begin refinement.</p>
+            </div>
+          </div>
+          <div id="ai-typing-indicator"
+            class="px-5 py-2 text-[9px] font-black text-accent uppercase tracking-widest animate-pulse hidden">Refining
+            Logic...</div>
+        </div>
+
+        <!-- Command Input Island -->
+        <div class="w-full flex flex-col gap-2 md:gap-3 pointer-events-auto">
+          <!-- Suggestion Chips -->
+          <div class="flex gap-2 justify-end overflow-x-auto pb-1 scrollbar-hide px-1">
+            <button onclick="quickPrompt('Switch to Elite Glass Aurora (Indigo/Lavender)')"
+              class="px-3 py-1 bg-white/10 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest hover:border-accent transition-all whitespace-nowrap">❄️
+              Aurora</button>
+            <button onclick="quickPrompt('Switch to Elite Glass Cosmic (Dark Mode)')"
+              class="px-3 py-1 bg-white/10 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest hover:border-accent transition-all whitespace-nowrap">🌌
+              Cosmic</button>
+            <button onclick="quickPrompt('Switch to Golden Hour Theme (Warm Amber/Orange)')"
+              class="px-3 py-1 bg-white/10 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest hover:border-accent transition-all whitespace-nowrap">🌅
+              Golden</button>
+            <button onclick="quickPrompt('Switch to Cyberpunk Theme (Neon Pink/Blue)')"
+              class="px-3 py-1 bg-white/10 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest hover:border-accent transition-all whitespace-nowrap">🌆
+              Cyber</button>
+            <button onclick="quickPrompt('Switch to Deep Sea Theme (Dark Teal/Cyan)')"
+              class="px-3 py-1 bg-white/10 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest hover:border-accent transition-all whitespace-nowrap">🌊
+              Deep Sea</button>
+          </div>
+
+          <div
+            class="min-h-[56px] glass rounded-2xl flex items-center px-4 gap-2 md:gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-studioBorderStrong group focus-within:border-accent/60 focus-within:shadow-[0_0_30px_var(--accent-glow)] transition-all duration-500">
+            <input type="file" id="ai-image-input" class="hidden" accept="image/*" onchange="handleImageUpload(this)">
+            <button onclick="document.getElementById('ai-image-input').click()"
+              class="w-10 h-10 flex items-center justify-center text-studioMuted hover:text-accent transition-all hover:bg-accent/10 rounded-lg"
+              title="Upload Image"><i data-lucide="image" class="w-4 h-4"></i></button>
+            <button onclick="showAISettings()"
+              class="w-10 h-10 flex items-center justify-center text-studioMuted hover:text-accent transition-all hover:bg-accent/10 rounded-lg"
+              title="Studio Settings"><i data-lucide="settings-2" class="w-4 h-4"></i></button>
+            <textarea id="ai-input" rows="1" placeholder="Design intent..."
+              class="bg-transparent flex-1 text-[13px] font-medium focus:outline-none resize-none py-4 scrollbar-hide text-studioText placeholder:text-studioMuted/50"></textarea>
+            <button id="btn-send-ai" onclick="sendAIMessage()"
+              class="w-10 h-10 flex items-center justify-center bg-accent text-white rounded-lg hover:scale-105 active:scale-95 transition-all shadow-[0_10px_20px_rgba(16,185,129,0.3)] group/send">
+              <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-0.5 transition-transform"></i>
             </button>
           </div>
-
-          <div class="ep-control">
-            <label class="feat-toggle">
-              <input type="checkbox" id="feat-tailwind" onchange="onFeatureChange()">
-              <span class="feat-label">Tailwind CSS (CDN)</span>
-            </label>
-            <p class="feat-desc">Enable Utility-first styling via Play CDN</p>
-          </div>
-
-          <div class="ep-control">
-            <label class="feat-toggle">
-              <input type="checkbox" id="feat-reset" onchange="onFeatureChange()">
-              <span class="feat-label">Modern CSS Reset</span>
-            </label>
-            <p class="feat-desc">Remove browser default styles & normalize</p>
-          </div>
-
-          <div class="ep-control">
-            <label class="feat-toggle">
-              <input type="checkbox" id="feat-lucide" onchange="onFeatureChange()" checked>
-              <span class="feat-label">Lucide Icons Support</span>
-            </label>
-            <p class="feat-desc">Enable &lt;i data-lucide="..."&gt;&lt;/i&gt;</p>
-          </div>
-
-          <div class="ep-control">
-            <div class="ep-label-row">
-              <span class="ep-label">Google Fonts</span>
-            </div>
-            <input type="text" id="feat-fonts" class="ep-input" placeholder="e.g. Inter, Roboto, Pacifico" oninput="onFeatureChange()">
-            <p class="feat-desc">Comma-separated font family names</p>
-          </div>
         </div>
-        <!-- End Features Panel -->
-
       </div>
+    </section>
 
-      <div class="output-bar">
-        <button class="output-header" onclick="toggleOutput()" aria-expanded="false" aria-controls="output-body" aria-label="Toggle export output panel">
-          <i class="lucide-icon out-icon" data-lucide="chevron-right" id="out-icon"></i>
-          <span class="pane-title">Output</span>
-          <span class="pane-badge" id="out-badge" style="display:none">PNG ready</span>
-        </button>
-        <div class="output-body" id="output-body">
-          <img id="output-thumb" alt="output">
-          <div class="output-info" id="output-info"></div>
-          <button class="btn btn-copy" onclick="copyImage()" style="margin-top:8px">
-            <i data-lucide="copy"></i> Copy Image
-          </button>
+    <!-- Export Overlay -->
+    <div id="export-result-overlay"
+      class="fixed inset-0 z-[100] glass flex items-center justify-center p-6 md:p-12 hidden animate-in fade-in duration-500">
+      <button onclick="closeOutput()"
+        class="absolute top-6 right-6 md:top-10 md:right-10 p-3 md:p-4 hover:bg-white/10 rounded-full transition-all"><i
+          data-lucide="x" class="w-6 h-6 md:w-8 md:h-8"></i></button>
+      <div class="max-w-5xl w-full flex flex-col lg:flex-row gap-8 md:gap-16 items-center chat-animate">
+        <div
+          class="w-full flex-1 shadow-[0_60px_120px_-20px_rgba(0,0,0,1)] rounded-2xl border-2 md:border-4 border-studioBorderStrong overflow-hidden bg-black">
+          <img id="output-thumb" src="" class="w-full h-auto max-h-[50vh] md:max-h-none object-contain">
+        </div>
+        <div class="w-full lg:w-96 space-y-6 md:space-y-10">
+          <div class="space-y-2 md:space-y-4">
+            <h2 class="text-3xl md:text-5xl font-black italic tracking-tighter">RENDERED</h2>
+            <div class="h-1 w-20 md:h-1.5 md:w-24 bg-accent"></div>
+          </div>
+          <div id="output-info" class="space-y-3 md:space-y-5 p-5 md:p-8 bg-white/5 rounded-3xl border border-white/5">
+          </div>
+          <div class="flex flex-col gap-3 md:gap-4">
+            <button onclick="copyImage()"
+              class="w-full py-4 md:py-5 bg-accent text-white rounded-2xl font-black uppercase text-[11px] md:text-[12px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl">Copy
+              To Clipboard</button>
+            <button onclick="closeOutput()"
+              class="w-full py-3 md:py-4 text-studioMuted font-bold uppercase text-[9px] md:text-[10px] tracking-widest">Done</button>
+          </div>
         </div>
       </div>
     </div>
+  </main>
 
+  <!-- Hidden Compatibility -->
+  <div class="hidden">
+    <span id="status-dim"></span>
+    <span id="preview-size-badge"></span>
+    <input type="hidden" id="export-scale" value="2">
+    <span id="export-px-label"></span>
+    <input type="hidden" id="preview-scale" value="1">
   </div>
 
-  <!-- Footer -->
-  <div class="app-footer">
-    <span class="footer-highlight">© 2026</span>
-    <span class="sep">·</span>
-    <span style="font-family:'Nunito',sans-serif;font-weight:800">Kbach.io</span><span
-      style="font-family:'Kantumruy Pro',sans-serif;font-size:10px;opacity:0.6;margin-left:4px">ក្បាច់</span>
-    <span class="sep">·</span>
-    <span><span class="footer-highlight">Powered by</span> <span class="author">Sokhour LACH</span></span>
+  <div id="ai-settings-modal"
+    class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xl hidden">
+    <div
+      class="w-[420px] glass rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-95">
+      <div class="p-8 border-b border-white/5 flex items-center justify-between">
+        <h3 class="font-black text-[10px] uppercase tracking-[0.2em] text-accent">Config Context</h3>
+        <button onclick="hideAISettings()"><i data-lucide="x" class="w-5 h-5 text-studioMuted"></i></button>
+      </div>
+      <div class="p-10 space-y-8">
+        <div class="space-y-3">
+          <label class="text-[9px] font-black uppercase tracking-widest text-studioMuted">Gemini Synchronizer</label>
+          <input type="password" id="gemini-api-key"
+            class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-[13px] focus:outline-none focus:border-accent transition-all"
+            placeholder="Enter API Key">
+        </div>
+        <div class="space-y-3">
+          <label class="text-[9px] font-black uppercase tracking-widest text-studioMuted">Compute Model</label>
+          <select id="ai-model"
+            class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-[13px] focus:outline-none appearance-none">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-3-flash-preview">Gemini 3 Flash</option>
+          </select>
+        </div>
+      </div>
+      <div class="p-8 bg-white/5 flex items-center justify-between">
+        <button onclick="debugModels()"
+          class="text-[9px] font-black text-studioMuted uppercase hover:text-accent transition-all">Debug
+          Registry</button>
+        <button onclick="saveAISettings()"
+          class="bg-accent text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all">Save
+          Context</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Mobile Action Bar -->
-  <div class="mobile-action-bar hidden-desktop">
-    <button class="btn" onclick="pasteHTML()" aria-label="Paste HTML">
-      <i data-lucide="clipboard"></i>
-    </button>
-    <button class="btn" onclick="formatHTML()" aria-label="Format HTML">
-      <i data-lucide="sparkles"></i>
-    </button>
-    <button class="btn btn-clear-action" onclick="clearEditor()" aria-label="Clear Editor">
-      <i data-lucide="trash-2"></i> <span class="btn-text">Clear</span>
-    </button>
-    <button class="btn btn-export" onclick="exportPNG()" aria-label="Export PNG image">
-      <i data-lucide="download"></i> Export PNG
-    </button>
-  </div>
-
+  <!-- External Library: Marked.js for Markdown Support -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="module" src="js/app.js"></script>
+  <script>
+    // Core Studio Interactions
+    window.toggleEditor = () => {
+      const c = document.getElementById('editor-container');
+      const a = document.getElementById('editor-arrow');
+      const aiBar = document.getElementById('ai-chat-sidebar');
+      const closed = c.classList.contains('translate-y-[450px]') || c.classList.contains('translate-y-[550px]');
+
+      if (closed) {
+        c.classList.remove('translate-y-[450px]', 'translate-y-[550px]');
+        if (a) a.style.transform = 'rotate(180deg)';
+        if (window.innerWidth < 1024 && aiBar) {
+          aiBar.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
+        }
+      } else {
+        c.classList.add('translate-y-[550px]');
+        if (a) a.style.transform = 'rotate(0deg)';
+        if (aiBar) {
+          aiBar.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
+        }
+      }
+    }
+
+    window.toggleAIChat = () => {
+      const p = document.getElementById('ai-panel-inner');
+      p.classList.toggle('hidden');
+    }
+
+    // Mobile Responsive Functions
+    window.toggleMobileSettings = () => {
+      const overlay = document.getElementById('mobile-settings-overlay');
+      const panel = document.getElementById('mobile-settings-panel');
+      const isHidden = overlay.classList.contains('hidden');
+
+      if (isHidden) {
+        overlay.classList.remove('hidden');
+        // Sync values
+        document.getElementById('mob-inp-w').value = document.getElementById('inp-w').value;
+        document.getElementById('mob-inp-h').value = document.getElementById('inp-h').value;
+        document.getElementById('mob-auto-h').checked = document.getElementById('auto-h').checked;
+
+        setTimeout(() => {
+          panel.classList.remove('translate-y-full');
+        }, 10);
+      } else {
+        panel.classList.add('translate-y-full');
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+        }, 500);
+      }
+    }
+
+    window.syncDimInputs = (dim) => {
+      const mobVal = document.getElementById(`mob-inp-${dim}`).value;
+      document.getElementById(`inp-${dim}`).value = mobVal;
+      window.onDimChange();
+    }
+
+    window.syncAutoH = () => {
+      const mobVal = document.getElementById('mob-auto-h').checked;
+      document.getElementById('auto-h').checked = mobVal;
+      window.onAutoHChange();
+    }
+
+    window.applyPreset = (val) => {
+      const sel = document.getElementById('preset-sel');
+      sel.value = val;
+      window.loadPreset();
+      // Re-sync mobile inputs
+      document.getElementById('mob-inp-w').value = document.getElementById('inp-w').value;
+      document.getElementById('mob-inp-h').value = document.getElementById('inp-h').value;
+    }
+
+    window.setExportScale = (scale) => {
+      const sel = document.getElementById('export-scale-sel');
+      sel.value = scale;
+      window.onScaleChange();
+
+      // Update UI
+      document.querySelectorAll('.mob-scale-btn').forEach(btn => {
+        if (parseInt(btn.dataset.scale) === scale) {
+          btn.classList.add('bg-accent', 'text-white');
+          btn.classList.remove('bg-white/5', 'text-studioText');
+        } else {
+          btn.classList.remove('bg-accent', 'text-white');
+          btn.classList.add('bg-white/5', 'text-studioText');
+        }
+      });
+    }
+
+    window.toggleMobilePanel = (panelType) => {
+      const overlay = document.getElementById('mobile-drawer-overlay');
+      const panel = document.getElementById('mobile-drawer-panel');
+      const content = document.getElementById('mobile-drawer-content');
+      const title = document.getElementById('mobile-drawer-title');
+
+      if (!panelType) {
+        panel.classList.add('translate-y-full');
+        setTimeout(() => overlay.classList.add('hidden'), 500);
+        return;
+      }
+
+      // Get content from desktop panels
+      const sourcePanel = document.getElementById(`panel-${panelType}`);
+      if (!sourcePanel) return;
+
+      title.textContent = panelType.toUpperCase();
+      // Clone content but keep functionality
+      content.innerHTML = sourcePanel.innerHTML;
+
+      // Re-attach Lucide icons
+      if (window.lucide) window.lucide.createIcons({ container: content });
+
+      overlay.classList.remove('hidden');
+      setTimeout(() => panel.classList.remove('translate-y-full'), 10);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const icons = () => { if (window.lucide) window.lucide.createIcons(); };
+      icons();
+      setTimeout(icons, 500);
+      setTimeout(icons, 2000);
+    });
+  </script>
 </body>
 
 </html>

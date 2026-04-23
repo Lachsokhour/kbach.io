@@ -91,11 +91,22 @@ export function applyScale() {
   var wrap = document.getElementById('preview-wrap');
   var viewport = document.getElementById('preview-viewport');
   if (!viewport || !wrap) return;
-  var vpW = viewport.clientWidth - 80;
-  var autoScale = Math.min(scale, vpW / state.currentW);
+
+  // Responsive padding: 80px on desktop, 32px on mobile
+  var isMobile = window.innerWidth < 1024;
+  var padding = isMobile ? 32 : 80;
+  
+  var vpW = viewport.clientWidth - padding;
+  var vpH = viewport.clientHeight - padding;
+  
+  var maxScale = isMobile ? 1.5 : scale;
+  var autoScale = Math.min(maxScale, vpW / state.currentW, vpH / state.currentH);
+  wrap.style.transformOrigin = 'top center';
   wrap.style.transform = 'scale(' + autoScale + ')';
+  
   var scaledH = state.currentH * autoScale;
   var scaledW = state.currentW * autoScale;
+  
   wrap.style.marginBottom = (-(state.currentH - scaledH)) + 'px';
   wrap.style.marginRight = (-(state.currentW - scaledW) / 2) + 'px';
   wrap.style.marginLeft = (-(state.currentW - scaledW) / 2) + 'px';
@@ -111,7 +122,7 @@ export function exportPNG() {
     return;
   }
 
-  var exportScale = parseInt(document.getElementById('export-scale').value) || 2;
+  var exportScale = state.exportScale || 2;
   import('./ui.js').then(ui => {
     ui.showLoading(true);
     ui.showMsg('Rendering with High-Fidelity\u2026');
@@ -182,17 +193,13 @@ export function exportPNG() {
         var outInfo = document.getElementById('output-info');
         if (outInfo) {
           outInfo.innerHTML =
-            '<div class="output-info-row">Dimensions: <span>' + (state.currentW * exportScale) + ' \u00d7 ' + (state.currentH * exportScale) + 'px</span></div>' +
-            '<div class="output-info-row">Scale: <span>' + exportScale + '\u00d7</span></div>' +
-            '<div class="output-info-row">Engine: <span style="color:var(--accent)">High-Fidelity</span></div>';
+            '<div class="flex justify-between text-[10px] font-black uppercase text-gray-500">Dimensions <span class="text-white">' + (state.currentW * exportScale) + ' × ' + (state.currentH * exportScale) + 'px</span></div>' +
+            '<div class="flex justify-between text-[10px] font-black uppercase text-gray-500">Render Scale <span class="text-accent">' + exportScale + 'x</span></div>' +
+            '<div class="flex justify-between text-[10px] font-black uppercase text-gray-500">Pixel Engine <span class="text-white">Studio 2.0 High-Fidelity</span></div>';
         }
 
-        var outBody = document.getElementById('output-body');
-        if (outBody) outBody.classList.add('open');
-        var outIcon = document.getElementById('out-icon');
-        if (outIcon) outIcon.classList.add('open');
-        var outBadge = document.getElementById('out-badge');
-        if (outBadge) outBadge.style.display = 'inline';
+        var overlay = document.getElementById('export-result-overlay');
+        if (overlay) overlay.classList.remove('hidden');
 
         var ts = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
         var a = document.createElement('a');
@@ -281,9 +288,7 @@ function applyNoiseToCanvas(canvas, noiseAmount, callback) {
 }
 
 export function updateExportLabel() {
-  var scaleInp = document.getElementById('export-scale');
-  if (!scaleInp) return;
-  var scale = parseInt(scaleInp.value) || 2;
+  var scale = state.exportScale || 2;
   var outW = state.currentW * scale;
   var outH = state.currentH * scale;
   var label = document.getElementById('export-px-label');

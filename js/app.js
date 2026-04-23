@@ -23,14 +23,17 @@ import {
   toggleTheme, 
   updateThemeIcon, 
   showMsg, 
-  toggleOutput, 
   toggleEffectsPanel, 
   closeEffectsPanel, 
   toggleFeaturesPanel,
   closeFeaturesPanel,
   resetEffects, 
   onEffectChange,
-  onFeatureChange
+  onFeatureChange,
+  onScaleChange,
+  closeOutput,
+  toggleOutput,
+  syncUIWithState
 } from './modules/ui.js';
 import { 
   renderPreview, 
@@ -38,12 +41,13 @@ import {
   applyScale, 
   exportPNG, 
   copyImage, 
-  updateExportLabel 
+  updateExportLabel
 } from './modules/export.js';
 import { 
   scheduleSave, 
   loadSettings 
 } from './modules/storage.js';
+import { setupChatUI } from './modules/chat-ui.js';
 
 // ─── Init ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function () {
@@ -96,6 +100,12 @@ window.addEventListener('DOMContentLoaded', function () {
     applyScale();
     scheduleSave();
   });
+
+  // Setup AI Chat UI
+  setupChatUI();
+
+  // Sync UI with Persisted State
+  syncUIWithState();
 });
 
 // ─── Global Orchestration ────────────────────────────────────
@@ -173,6 +183,7 @@ window.toggleTheme = toggleTheme;
 window.exportPNG = exportPNG;
 window.copyImage = copyImage;
 window.toggleOutput = toggleOutput;
+window.closeOutput = closeOutput;
 window.undoClear = undoClear;
 window.syncScroll = syncScroll;
 window.toggleEffectsPanel = toggleEffectsPanel;
@@ -182,9 +193,48 @@ window.closeFeaturesPanel = closeFeaturesPanel;
 window.resetEffects = resetEffects;
 window.onEffectChange = onEffectChange;
 window.onFeatureChange = onFeatureChange;
+window.onScaleChange = onScaleChange;
 window.updatePreviewSize = function() { applyScale(); scheduleSave(); };
 window.updateExportLabel = function() { updateExportLabel(); scheduleSave(); };
 window.scheduleSave = scheduleSave;
+
+export function switchSidebar(panel) {
+  const container = document.getElementById('sidebar-panels-container');
+  const panels = ['templates', 'effects', 'features'];
+  
+  // If clicking an already open panel, close it
+  const targetPanel = document.getElementById(`panel-${panel}`);
+  const isCurrentlyOpen = targetPanel && !targetPanel.classList.contains('hidden') && container.classList.contains('w-64');
+
+  if (isCurrentlyOpen) {
+    container.classList.add('w-0', 'opacity-0');
+    container.classList.remove('w-64', 'opacity-100');
+    return;
+  }
+
+  panels.forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    if (el) {
+      if (p === panel) el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    }
+  });
+
+  // Ensure sidebar panels container is visible
+  if (container) {
+    container.classList.remove('w-0', 'opacity-0');
+    container.classList.add('w-64', 'opacity-100');
+  }
+}
+window.switchSidebar = switchSidebar;
+
+window.closeSidebar = function() {
+  const container = document.getElementById('sidebar-panels-container');
+  if (container) {
+    container.classList.add('w-0', 'opacity-0');
+    container.classList.remove('w-64', 'opacity-100');
+  }
+};
 
 // ─── Extension Integration ───────────────────────────────────
 window.addEventListener('message', function (evt) {

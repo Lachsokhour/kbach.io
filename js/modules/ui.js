@@ -55,12 +55,15 @@ export function setAutoH(on) {
 }
 
 export function updateDimLabels() {
-  var label = state.currentW + ' \u00d7 ' + state.currentH;
-  document.getElementById('status-dim').textContent = label;
-  document.getElementById('preview-size-badge').textContent = label;
-  document.getElementById('frame-label').textContent = state.currentW + ' \u00d7 ' + state.currentH + 'px';
-  document.getElementById('preview-iframe').width = state.currentW;
-  document.getElementById('preview-iframe').height = state.currentH;
+  var label = state.currentW + ' \u00d7 ' + state.currentH + ' px';
+  const frameLabel = document.getElementById('frame-label');
+  if (frameLabel) frameLabel.textContent = label;
+  
+  const iframe = document.getElementById('preview-iframe');
+  if (iframe) {
+    iframe.width = state.currentW;
+    iframe.height = state.currentH;
+  }
   updateExportLabel();
 }
 
@@ -78,7 +81,7 @@ export function updateThemeIcon() {
 
   var btn = document.getElementById('theme-btn');
   if (btn) {
-    btn.innerHTML = isLight ? '<i data-lucide="moon"></i>' : '<i data-lucide="sun"></i>';
+    btn.innerHTML = isLight ? '<i data-lucide="sun" class="w-4 h-4 text-studioMuted"></i>' : '<i data-lucide="moon" class="w-4 h-4 text-studioMuted"></i>';
     if (window.lucide) window.lucide.createIcons();
   }
 }
@@ -87,8 +90,13 @@ export function updateThemeIcon() {
 export function showLoading(on) {
   var el = document.getElementById('preview-loading');
   if (!el) return;
-  if (on) el.classList.add('show');
-  else el.classList.remove('show');
+  if (on) {
+     el.classList.remove('opacity-0', 'pointer-events-none');
+     el.classList.add('opacity-100');
+  } else {
+     el.classList.add('opacity-0', 'pointer-events-none');
+     el.classList.remove('opacity-100');
+  }
 }
 
 export function showMsg(msg, err) {
@@ -101,17 +109,13 @@ export function showMsg(msg, err) {
 }
 
 export function toggleOutput() {
-  var body = document.getElementById('output-body');
-  var icon = document.getElementById('out-icon');
-  if (body) body.classList.toggle('open');
-  if (icon) icon.classList.toggle('open');
+  const overlay = document.getElementById('export-result-overlay');
+  if (overlay) overlay.classList.toggle('hidden');
 }
 
 export function closeOutput() {
-  var body = document.getElementById('output-body');
-  var icon = document.getElementById('out-icon');
-  if (body) body.classList.remove('open');
-  if (icon) icon.classList.remove('open');
+  const overlay = document.getElementById('export-result-overlay');
+  if (overlay) overlay.classList.add('hidden');
 }
 
 // ─── Live Effects Panel ────────────────────────────────────────
@@ -162,6 +166,11 @@ export function onEffectChange() {
   state.effectSat = document.getElementById('rng-sat').value;
   state.effectOpac = document.getElementById('rng-opac').value;
 
+  localStorage.setItem('kbach_effect_blur', state.effectBlur);
+  localStorage.setItem('kbach_effect_noise', state.effectNoise);
+  localStorage.setItem('kbach_effect_sat', state.effectSat);
+  localStorage.setItem('kbach_effect_opac', state.effectOpac);
+
   document.getElementById('val-blur').textContent = state.effectBlur + 'px';
   document.getElementById('val-noise').textContent = state.effectNoise + '%';
   document.getElementById('val-sat').textContent = state.effectSat + '%';
@@ -177,8 +186,23 @@ export function onFeatureChange() {
   state.useLucide = document.getElementById('feat-lucide').checked;
   state.googleFonts = document.getElementById('feat-fonts').value;
 
+  localStorage.setItem('kbach_use_tailwind', state.useTailwind);
+  localStorage.setItem('kbach_use_reset', state.useReset);
+  localStorage.setItem('kbach_use_lucide', state.useLucide);
+  localStorage.setItem('kbach_google_fonts', state.googleFonts);
+
   renderPreview();
   scheduleSave();
+}
+
+export function onScaleChange() {
+  const sel = document.getElementById('export-scale-sel');
+  if (sel) {
+    state.exportScale = parseInt(sel.value) || 2;
+    localStorage.setItem('kbach_export_scale', state.exportScale);
+    updateExportLabel();
+    scheduleSave();
+  }
 }
 
 export function applyLiveEffects(targetIframe) {
@@ -226,4 +250,48 @@ export function applyLiveEffects(targetIframe) {
   } else if (noiseEl) {
     noiseEl.remove();
   }
+}
+
+/**
+ * Synchronize all UI elements (inputs, checkboxes, selects) 
+ * with the global state (usually after loading from localStorage)
+ */
+export function syncUIWithState() {
+  // 1. Sync Export Scale
+  const scaleSel = document.getElementById('export-scale-sel');
+  if (scaleSel) {
+    scaleSel.value = state.exportScale;
+    updateExportLabel();
+  }
+
+  // 2. Sync Feature Panel
+  const featTailwind = document.getElementById('feat-tailwind');
+  const featReset = document.getElementById('feat-reset');
+  const featLucide = document.getElementById('feat-lucide');
+  const featFonts = document.getElementById('feat-fonts');
+
+  if (featTailwind) featTailwind.checked = state.useTailwind;
+  if (featReset) featReset.checked = state.useReset;
+  if (featLucide) featLucide.checked = state.useLucide;
+  if (featFonts) featFonts.value = state.googleFonts;
+
+  // 3. Sync Effects Sliders
+  const rngBlur = document.getElementById('rng-blur');
+  const rngNoise = document.getElementById('rng-noise');
+  const rngSat = document.getElementById('rng-sat');
+  const rngOpac = document.getElementById('rng-opac');
+
+  if (rngBlur) rngBlur.value = state.effectBlur;
+  if (rngNoise) rngNoise.value = state.effectNoise;
+  if (rngSat) rngSat.value = state.effectSat;
+  if (rngOpac) rngOpac.value = state.effectOpac;
+
+  // 4. Update Visual Labels
+  if (document.getElementById('val-blur')) document.getElementById('val-blur').textContent = state.effectBlur + 'px';
+  if (document.getElementById('val-noise')) document.getElementById('val-noise').textContent = state.effectNoise + '%';
+  if (document.getElementById('val-sat')) document.getElementById('val-sat').textContent = state.effectSat + '%';
+  if (document.getElementById('val-opac')) document.getElementById('val-opac').textContent = state.effectOpac + '%';
+
+  // Apply visual changes to preview
+  applyLiveEffects();
 }

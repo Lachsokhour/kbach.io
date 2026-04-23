@@ -26,9 +26,11 @@ export function updateLineNums() {
   var val = state.jar ? state.jar.toString() : document.getElementById('html-editor').textContent;
   var lines = val.split('\n').length;
   var html = '';
-  for (var i = 1; i <= lines; i++) html += i + '\n';
+  for (var i = 1; i <= lines; i++) {
+    html += `<div class="h-[18px] md:h-[20px] flex items-center justify-end">${i}</div>`;
+  }
   var el = document.getElementById('line-nums');
-  if (el) el.textContent = html;
+  if (el) el.innerHTML = html;
 }
 
 export function updateStats() {
